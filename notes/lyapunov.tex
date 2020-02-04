@@ -1,0 +1,524 @@
+\documentclass[reqno]{amsart}
+%\usepackage{hyperref}
+\usepackage{fullpage}
+\usepackage{amsrefs}
+\usepackage{verbatim}
+\usepackage{tikz}
+\usepackage{graphicx}
+
+\newif\ifscreen
+\newif\iftwo
+\newif\ifshowall
+\newif\ifshowkeys
+\screenfalse
+\twotrue
+\showallfalse
+%\showkeystrue
+\showkeysfalse
+
+\input xypic
+
+\ifshowkeys
+\newcommand{\lbl}[1]{\label{#1}\textup{[\texttt{#1}]}\ \\}
+\else
+\newcommand{\lbl}{\label}
+\fi
+
+\input{../macros/macros}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{conj}[theorem]{Conjecture}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{assumption}[theorem]{Assumption}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{predefinition}[theorem]{Predefinition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{algorithm}[theorem]{Algorithm}
+\newtheorem{method}[theorem]{Method}
+\newtheorem{fact}[theorem]{Fact}
+% Exercises are numbered separately
+\newtheorem{exercise}{Exercise}[section]
+
+%\renewenvironment{solution}{\SolutionAtEnd}{\endSolutionAtEnd}
+%\renewenvironment{solution}{\SolutionHidden}{\endSolutionHidden}
+
+\newwrite\refs
+\openout\refs=\jobname.refs
+\makeatletter
+\renewcommand\@setref[3]{%
+        \ifx#1\relax
+                \write\refs{'#3' \thepage\space undefined}%
+                \protect \G@refundefinedtrue
+                \nfss@text{\reset@font\bfseries ??}%
+                \@latex@warning{Reference `#3' on page \thepage\space
+                                undefined}%
+        \else
+                \begingroup
+                \count@\expandafter\@secondoftwo#1\relax
+                \ifnum\c@page<\count@
+                        \write\refs{'#3' \thepage\space
+                                    \expandafter\@secondoftwo#1}%
+                \fi
+                \endgroup
+                \expandafter#2#1\null
+        \fi
+}
+\makeatother
+
+\begin{document}
+
+\title{Some proofs for Lyapunov theory}
+\maketitle
+
+We first recall some background.  Convergence of real numbers is
+defined as follows:
+
+\begin{definition}
+ A sequence $(x_n)$ of real numbers converges to a real number $a$ if
+ for all $\ep>0$, there is a natural number $N$ such that
+ $|x_n-a|<\ep$ for all $n\geq N$.
+\end{definition}
+
+We need to generalise this to cover sequences in $\R^2$ rather than
+$\R$. 
+
+\begin{definition}
+ Suppose we have a sequence of points $(x_n,y_n)\in\R^2$, and another
+ point $(a,b)\in\R^2$.  We say that the sequence converges to $(a,b)$
+ if for all $\ep>0$ there exists $N$ such that
+ $\|(x_n,y_n)-(a,b)\|<\ep$ for all $n\geq N$.
+\end{definition}
+
+This can easily be related to convergence in $\R$:
+\begin{lemma}
+ Suppose we have a sequence of points $(x_n,y_n)\in\R^2$, and another
+ point $(a,b)\in\R^2$.  Then $(x_n,y_n)$ converges to $(a,b)$ if and
+ only if $x_n$ converges to $a$ and $y_n$ converges to $b$.
+\end{lemma}
+\begin{proof}
+ Suppose that $(x_n,y_n)\to (a,b)$.  Given $\ep>0$, there
+ exists $N$ such that when $n\geq N$ we have
+ $\|(x_n,y_n)-(a,b)\|<\ep$.  However, we also have 
+ \[ |x_n-a| \leq \sqrt{|x_n-a|^2+|y_n-b|^2} = \|(x_n,y_n)-(a,b)\|, \]
+ so $|x_n-a|<\ep$.  This proves that $x_n\to a$, and similarly
+ $y_n\to b$.
+
+ Conversely, suppose that $x_n\to a$ and $y_n\to b$.  Given $\ep>0$ we
+ can choose $L$ such that $|x_n-a|<\ep/\sqrt{2}$ for $n\geq L$, and we
+ can choose $M$ such that $|y_n-b|<\ep/\sqrt{2}$ for $n\geq M$.  Put
+ $N=\max(L,M)$.  For $n\geq N$ we have $|x_n-a|<\ep/\sqrt{2}$ and
+ $|y_n-b|<\ep/\sqrt{2}$, so 
+ \[ \|(x_n,y_n)-(a,b)\| = \sqrt{|x_n-a|^2+|y_n-b|^2} <
+      \sqrt{\ep^2/2+\ep^2/2} = \ep,
+ \]
+ as required.
+\end{proof}
+
+The following result is standard:
+\begin{theorem}[Bolzano-Weierstrass]
+ Let $(x_n)$ be a sequence of real numbers, and suppose that there is
+ a constant $C$ such that $|x_n|\leq C$ for all $n$.  Then there is a
+ subsequence $(x_{n_k})$ (with $n_0<n_1<n_2<\dotsb $) and a real
+ number $a$ such that $x_{n_k}\to a$.
+\end{theorem}
+
+We will need the two-dimensional version:
+\begin{corollary}
+ Let $(x_n,y_n)$ be a sequence in $\R^2$, and suppose that there is
+ a constant $C$ such that $\|(x_n,y_n)\|\leq C$ for all $n$.  Then
+ there is a subsequence $(x_{n_k},y_{n_k})$ (with
+ $n_0<n_1<n_2<\dotsb $) and a point $(a,b)\in\R^2$ such that
+ $(x_{n_k},y_{n_k})\to(a,b)$. 
+\end{corollary}
+\begin{proof}
+ By the original Bolzano-Weierstrass Theorem, we can find a real
+ number $a$ and an increasing sequence of indices $p_k$ such that
+ $x_{p_k}\to a$.  Now the sequence $y_{p_k}$ is again bounded by $C$,
+ so we can find a real number $b$ and an increasing sequence of
+ indices $q_j$ such that $y_{p_{q_j}}\to b$.  In other words, if we
+ put $n_j=p_{q_j}$ then $y_{n_j}\to b$.  Moreover, the sequence
+ $(x_{n_j})$ is a subsequence of $(x_{m_i})$, and $x_{m_i}\to a$ so
+ $x_{n_j}\to a$.  It follows that $(x_{n_j},y_{n_j})\to(a,b)$ as
+ required. 
+\end{proof}
+
+\begin{definition}
+ Let $F$ be a subset of $\R^2$.  We say that $F$ is \emph{closed} if
+ whenever $(x_n,y_n)$ is a sequence in $F$ that converges to a point
+ $(a,b)\in\R^2$, we also have $(a,b)\in F$.
+\end{definition}
+
+\begin{example}
+ Consider the sets 
+ \begin{align*}
+  F_0 &= \{(x,y)\in\R^2\st x^2+y^2\leq 1\} \\
+  F_1 &= \{(x,y)\in\R^2\st x^2+y^2< 1\}.
+ \end{align*}
+ Then $F_0$ is closed but $F_1$ is not.  For example, the sequence
+ $(x_n,y_n)=(2^{-n},0)$ lies in $F_1$ and converges to the point
+ $(a,b)=(1,0)$, which does not lie in $F_1$; so $F_1$ is not closed.
+ In general, sets defined using $=$ and $\leq$ will usually be closed,
+ but sets defined using $<$ will often not be closed.  However, this
+ rule is not always reliable, so you should work from the official
+ definition. 
+\end{example}
+
+\begin{definition}
+ Given a point $u\in\R^2$, we define 
+ \[ B_{\ep}(u) = \{v\in\R^2\st \|u-v\|<\ep\}. \]
+\end{definition}
+
+\begin{definition}
+ Let $U$ be a subset of $\R^2$.  We say that $U$ is \emph{open} if for
+ every $u\in U$ there exists $\ep>0$ such that $B_\ep(u)\sse U$.
+\end{definition}
+
+\begin{example}
+ Consider the sets 
+ \begin{align*}
+  U_0 &= \{(x,y)\in\R^2\st x>0 \text{ and } y>0\} \\
+  U_1 &= \{(x,y)\in\R^2\st x>0 \text{ and } y\geq 0\} \\
+  U_2 &= \{(x,y)\in\R^2\st x\geq 0 \text{ and } y\geq 0\}.
+ \end{align*}
+ Then $U_0$ is open, but $U_1$ and $U_2$ are not.  Indeed, the point
+ $u=(1,0)$ is an element of $U_1$, but for every $\ep>0$ we have a
+ point $v=(1,-\ep/2)$ which lies in $B_\ep(u)$ but not in $U_1$, so
+ $B_\ep(u)\not\sse U_1$.  This proves that $U_1$ is not open, and the
+ same example also shows that $U_2$ is not open.  In general, sets
+ defined using $\neq$ and $<$ are usually open, but sets defined using
+ $\leq$ will often not be open.  However, this rule is not always
+ reliable, so you should work from the official definition.
+\end{example}
+
+\begin{remark}
+ Most subsets of $\R^2$ are neither open nor closed.  For example, the
+ set $U_1$ described above is not open, and also it is not closed.
+\end{remark}
+
+\begin{proposition}
+ Let $F$ and $U$ be two subsets of $\R^2$ that are complements of each
+ other, so that 
+ \begin{align*}
+  U &= \{p\in\R^2\st p\not\in F\} \\
+  F &= \{p\in\R^2\st p\not\in U\}.
+ \end{align*}
+ Then $F$ is closed if and only if $U$ is open.
+\end{proposition}
+\begin{proof}
+ We will prove that $F$ is not closed if and only if $U$ is not open.
+ A little thought will convince you that this is equivalent to the
+ claimed statement.
+
+ Suppose that $F$ is not closed.  This means that there is a sequence
+ of points $v_n=(x_n,y_n)\in F$ and a point $u=(a,b)\not\in F$ such
+ that $v_n\to u$.  As $u\not\in F$ we instead have $u\in U$.  Consider
+ a number $\ep>0$.  As $v_n\to u$, there exists $N$ such that
+ $\|v_N-u\|<\ep$, or in other words $v_N\in B_\ep(u)$.  Now
+ $v_N\in F$, so $v_N\not\in U$, so $B_\ep(u)\not\sse U$.  As this
+ holds for all $\ep>0$, we see that $U$ is not open.
+
+ Conversely, suppose that $U$ is not open.  This means that there is a
+ point $u\in U$ such that there is no $\ep>0$ with $B_\ep(u)\sse U$.
+ In particular, $B_{1/n}(u)$ is not contained in $U$, so we can choose
+ a point $v_n\in B_{1/n}(u)$ such that $v_n\not\in U$, or equivalently
+ $v_n\in F$.  As $v_n\in B_{1/n}(u)$ we have $\|v_n-u\|<1/n$, and this
+ implies that $v_n\to u$.  Now the points $v_n$ form a sequence in
+ $F$, which converges to the point $u$, which does not lie in $F$.
+ This means that $F$ is not closed.
+\end{proof}
+
+We now consider a differential equation and its solutions. Let $f$ and
+$g$ be continuously differentiable functions on $\R^2$.  For any point
+$(x_0,y_0)\in\R^2$, we would like to consider maps $x,y\:\R\to\R^2$
+such that $x(0)=x_0$ and $y(0)=y_0$ and
+\begin{align*}
+ \dot{x}(t) &= f(x(t),y(t)) \\
+ \dot{y}(t) &= g(x(t),y(t))
+\end{align*}
+for all $t\in\R$.  Unfortunately, this is not always possible.  
+
+\begin{example}
+ Consider the equations $\dot{x}=x^2$ and $\dot{y}=0$ with $x=y=1$ at
+ $t=0$.  There is a solution $(x,y)=(1/(1-t),1)$, but this becomes
+ undefined at $t=1$.  There is no solution that is defined and
+ differentiable on all of $\R$.
+\end{example}
+
+However, the above example is essentially the worst thing that can
+happen, as shown by the following result.
+
+\begin{theorem}
+ For any point $(x_0,y_0)\in\R^2$, there is a unique pair of
+ continuously differentiable functions $x,y\:(\al,\bt)\to\R$ such that
+ \begin{itemize}
+  \item $\al$ is either $-\infty$ or a negative real number.
+  \item $\bt$ is either $+\infty$ or a positive real number.
+  \item $x(0)=x_0$ and $y(0)=y_0$
+  \item For all $t\in(\al,\bt)$ we have $\dot{x}(t)=f(x(t),y(t))$ and
+   $\dot{y}(t)=g(x(t),y(t))$.
+  \item Either $\al=-\infty$, or $\al$ is finite and
+   $\|(x(t),y(t))\|\to\infty$ as $t\to\al$.
+  \item Either $\bt=+\infty$, or $\bt$ is finite and
+   $\|(x(t),y(t))\|\to\infty$ as $t\to\bt$.
+ \end{itemize}
+\end{theorem}
+
+This is a very important theorem, which we have implicitly been using
+throughout the course, but we will not prove it.  A proof can be found
+in the recommended book by Teschl.
+
+\begin{assumption}
+ For simplicity, we will consider only systems for which $\al$ is
+ always $-\infty$ and $\bt$ is always $+\infty$, so the solutions are
+ defined for all $t\in\R$.
+\end{assumption}
+
+\begin{definition}
+ We put $\phi(t,(x_0,y_0))=(x(t),y(t))$, where $x(t)$ and $y(t)$ give
+ the unique solution as discussed above.
+\end{definition}
+
+\begin{theorem}
+ The function $\phi$ is continuously differentiable as a map from
+ $\R^3$ to $\R^2$.
+\end{theorem}
+Again, a proof can be found in the book by Teschl.
+
+\begin{assumption}
+ From now on, we make the following additional assumptions:
+ \begin{itemize}
+  \item[(a)] $R$ is an open subset of $\R^2$.
+  \item[(b)] $e=(a,b)$ is a point in $R$ where $f(e)=g(e)=0$.
+  \item[(c)] $V$ is a continuously differentiable function on $R$.
+  \item[(d)] $V(e)=0$, and $V(u)>0$ for all other points $u\in R$.  (In
+   other words, $V$ is positive definite.)
+  \item[(e)] The function $W=V_xf+V_yg$ satisfies $W(e)=0$, and $W(u)<0$
+   for all other points $u\in R$.  (In other words, $W$ is negative
+   definite.) 
+ \end{itemize}
+ This means that $V$ is a \emph{strong Lyapunov function} for $R$ and
+ $e$. 
+\end{assumption}
+
+\begin{remark}\lbl{rem-decreasing}
+ Suppose we have a solution $u(t)=(x(t),y(t))$ to our equations.  We
+ then have 
+ \begin{align*}
+  \frac{d}{dt}V(x(t),y(t))
+   &= V_x(x(t),y(t))\dot{x}(t) + V_y(x(t),y(t))\dot{y}(t) \\
+   &= V_x(x(t),y(t))f(x(t),y(t)) + V_y(x(t),y(t))g(x(t),y(t)) \\
+   &= W(x(t),y(t)) \leq 0,
+ \end{align*}
+ so $V(x(t),y(t))$ is a weakly decreasing function of $t$.  However,
+ this is only valid as long as the curve $u(t)=(x(t),y(t))$ stays
+ inside $R$.  Suppose that $t_0<t_1<t_2$ and $u(t_0),u(t_2)\in R$ but
+ $u(t_1)\not\in R$.  Then the above argument is not valid when
+ $t=t_1$, because $V(u(t_1))$ and $W(u(t_1))$ are undefined, so we
+ cannot conclude that $u(t_2)\leq u(t_0)$.
+\end{remark}
+
+\begin{definition}\lbl{defn-stable}
+ The point $e$ is \emph{asymptotically stable} if for all $\ep>0$
+ there exists $\ep'>0$ such that whenever $\|u-e\|<\ep'$, we have
+ $\|\phi(t,u)-e\|<\ep$ for all $t\geq 0$, and also $\phi(t,u)\to e$ as
+ $t\to\infty$. 
+\end{definition}
+
+We will show that whenever there is a Lyapunov function as described
+above, the point $e$ is automatically asymptotically stable.
+
+\begin{definition}\lbl{defn-U}
+ We choose a number $\ep_0>0$ such that $B_{\ep_0}(e)\sse R$.  (This
+ is always possible, because $R$ is assumed to be an open set
+ containing $e$.)  When $0<\ep<\ep_0$, we put 
+ \begin{align*}
+  U_\ep &= B_\ep(e) = \{u\in\R^2\st \|u-e\|<\ep\} \\
+  \ov{U}_\ep &=  \{u\in\R^2\st \|u-e\|\leq\ep\},
+ \end{align*}
+ so $U_\ep$ is open, $\ov{U}_\ep$ is closed, and
+ $e\in U_\ep\sse\ov{U}_\ep\sse R$.
+\end{definition}
+
+\begin{definition}\lbl{defn-S}
+ Given $\dl>0$, we put $S^*_{\dl}=\{u\in R\st V(u)\leq\dl\}$.  This
+ contains $e$, and it may split up into several different components.
+ Suppose we have two points $u,v\in S^*_\dl$.  We say that they are
+ \emph{connected in $S^*_\dl$} if there is a continuous map
+ $\gm\:[0,1]\to S^*_\dl$ with $\gm(0)=u$ and $\gm(1)=v$.  We put 
+ \[ S_\dl = \{u\in S_\dl^*\st u \text{ is connected to } e
+               \text{ in } S_\dl^* \}.
+ \]
+ Note that $e\in S_\dl\sse S^*_\dl\sse R$.
+\end{definition}
+
+\begin{example}\lbl{eg-disc-connected}
+ We will show later that for each $\dl>0$ there exists $\ep>0$ such that
+ $U_\ep\sse S_\dl^*$.  Every point $u\in U_\ep$ can be connected to
+ $e$ by the path $\gm(t)=u+t(e-u)$, which goes in a straight line from
+ $u$ to $e$.  This path stays inside $U_\ep$, and $U_\ep\sse S_\dl^*$,
+ so $\gm$ stays inside $S_\dl^*$.  This shows that $u$ actually lies
+ in $S_\dl$, not just $S_\dl^*$.  We conclude that $U_\ep\sse S_\dl$.
+\end{example}
+
+\begin{example}\lbl{eg-flow-connected}
+ Suppose that $u\in S^*_\dl\subset R$, and that $v=\phi(t,u)$ for some
+ $t>0$.  Suppose also that $\phi(s,u)\in R$ for all $s$ with
+ $0\leq s\leq t$.  In other words, there is a flow line running from
+ $u$ to $v$, and it stays in $R$.  By Remark~\ref{rem-decreasing}, we
+ have $V(v)\leq V(u)\leq\dl$, so $v\in S_\dl^*$.
+
+ Now suppose that $u$ is in $S_\dl$, so there is a path $\gm$ from $e$
+ to $u$ in $S_\dl^*$.  The flow line gives a path from $u$ to $v$ in
+ $S_\dl^*$, and we can join these two paths together to get a path
+ from $e$ to $v$ in $S_\dl^*$.  This shows that $v$ actually lies in
+ $S_\dl$.
+\end{example}
+
+\begin{proposition}\label{prop-U-S}
+ For all $\dl>0$, there exists $\ep$ with $0<\ep<\ep_0$ such that
+ $U_\ep\sse S_\dl^*$.
+\end{proposition}
+\begin{proof}
+ We will suppose that there is no such $\ep$, and deduce a
+ contradiction. 
+
+ Let $n_0$ be a large integer, big enough that $1/n_0<\ep_0$.  By
+ assumption, for $n\geq n_0$ we have $U_{1/n}\not\sse S_\dl^*$.  We
+ can therefore choose $u_n\in U_{1/n}\sse R$ with
+ $u_n\not\in S_\dl^*$.  As $u_n\not\in S_\dl^*$, we must have
+ $V(u_n)>\dl$.  However, as $u_n\in U_{1/n}$ we have $\|u-e\|<1/n$, so
+ $u_n\to e$.  As $V$ is continuous on $R$,  it follows that
+ $V(u_n)\to V(e)=0$.  As $V(u_n)>\dl$ for all $n$, this is
+ impossible.  We therefore have a contradiction, so the Proposition
+ must be true after all.
+\end{proof}
+
+\begin{corollary}\lbl{cor-U-S}
+ For all $\dl>0$, there exists $\ep$ with $0<\ep<\ep_0$ such that
+ $U_\ep\sse S_\dl$. 
+\end{corollary}
+\begin{proof}
+ This follows from the Proposition by
+ Example~\ref{eg-disc-connected}. 
+\end{proof}
+
+\begin{proposition}\lbl{prop-S-U}
+ For all $\ep$ with $0<\ep<\ep_0$, there exists $\dl>0$ such that
+ $S_\dl\sse U_\ep$.
+\end{proposition}
+\begin{proof}
+ We will suppose that there is no such $\dl$, and deduce a
+ contradiction. 
+
+ By assumption, for all $n>0$, the set $S_{1/n}$ is not contained in
+ $U_\ep$.  We can therefore choose a point $u_n\in S_{1/n}$ such that
+ $u_n\not\in U_\ep$.  As $u_n\not\in U_\ep$, we have
+ $\|u-e\|\geq\ep$.  As $u_n\in S_\dl$, we can choose a continuous map
+ $\gm\:[0,1]\to S_\dl^*$ with $\gm(0)=e$ and $\gm(1)=u_n$.  Now
+ $\|\gm(t)-e\|$ is a continuous function of $t$ that is $0$ when
+ $t=0$, and is greater than or equal to $\ep$ when $t=1$.  By the
+ Intermediate Value Theorem, there exists $t_0\in [0,1]$ with
+ $\|\gm(t_0)-e\|=\ep$.  We put $v_n=\gm(t_0)$, so $\|v_n-e\|=\ep$.
+ Moreover, the path $\gm$ joins $e$ to $v_n$ in $S_\dl^*$, so
+ $v_n\in S_\dl$.  Because $\|v_n-e\|=\ep$, we have
+ $\|v_n\|\leq\|e\|+\ep$ for all $n$, so the sequence $(v_n)$ is
+ bounded.  Thus, the Bolzano-Weierstrass theorem says that we can find
+ a subsequence $(v_{n_k})$ and a point $w\in\R^2$ such that
+ $v_{n_k}\to w$.  It follows that $\|v_{n_k}-e\|\to\|w-e\|$, but
+ $\|v_{n_k}-e\|=\ep$, so $\|w-e\|=\ep$.  In particular, we have
+ $\|w-e\|<\ep_0$, so $w\in U_{\ep_0}\sse R$.  As $V$ is continuous on
+ $R$, it follows that $V(v_{n_k})\to V(w)$.  However,
+ $v_n\in S_{1/n}$, so $0\leq V(v_n)\leq 1/n$, so $V(v_n)\to 0$.  This
+ means that $w\in R$ with $V(w)=0$, but $V$ is positive definite, so
+ $w$ must be equal to $e$.  This means that $v_{n_k}\to e$, but that
+ is impossible because $\|v_{n_k}-e\|=\ep>0$ for all $k$.
+
+ Thus, the Proposition must be true after all.
+\end{proof}
+
+\begin{proposition}\lbl{prop-invariant}
+ Suppose that $0<\ep<\ep_0$, and that $S_\dl\sse U_\ep$.  Then any
+ flow line that starts in $S_\dl$ stays in $S_\dl$ for all $t$.
+\end{proposition}
+\begin{proof}
+ Consider a flow line $u(t)=(x(t),y(t))$ such that $u(0)\in S_\dl$.
+ Put 
+ \[ t_0=\sup\{t\st u([0,t])\sse S_\dl\}. \]
+ We want to prove that $t_0=\infty$.  We will suppose that
+ $t_0<\infty$, and deduce a contradiction.  For $0\leq t<t_0$ we have
+ $u(t)\in S_\dl\sse U_\ep$, so $\|u(t)-e\|<\ep$.  It follows that
+ $\|u(t_0)-e\|\leq\ep<\ep_0$.  By continuity, there exists $t_1>t_0$
+ such that $\|u(t)-e\|<\ep_0$ for $0\leq t\leq t_1$.  This means that
+ the flow line stays within $U_{\ep_0}\sse R$ from $t=0$ to $t=t_1$.
+ Thus, Remark~\ref{rem-decreasing} tells us that
+ $V(u(t))\leq V(u(0))\leq\dl$ for $0\leq t\leq t_1$, so these points
+ $u(t)$ all lie in $S_\dl^*$.  Moreover, all these points are
+ connected together in $S_\dl^*$ by the flow line, so they lie in
+ $S_\dl$ by Example~\ref{eg-flow-connected}.  Thus,
+ $u([0,t_1])\sse S_\dl$.  This is a contradiction, because $t_1>t_0$,
+ and $t_0$ was defined to be the supremum of all numbers $t$ such that
+ $u([0,t])\sse S_\dl$.
+
+ We must therefore have $t_0=\infty$ after all, which means that
+ $u(t)\in S_\dl$ for all $t\geq 0$. 
+\end{proof}
+
+\begin{theorem}
+ The point $e$ is asymptotically stable.
+\end{theorem}
+\begin{proof}
+ Suppose given $\ep>0$.  Put $\ep_1=\min(\ep_0/2,\ep)$, so
+ $0<\ep_1<\ep_0$.  Proposition~\ref{prop-S-U} says that we can choose
+ $\dl$ such that $S_\dl\sse U_{\ep_1}$.  Corollary~\ref{cor-U-S}
+ says that we can choose $\ep_2$ such that $U_{\ep_2}\sse S_\dl$.
+ Consider a flow line $u$ that starts at
+ $u(0)\in U_{\ep_2}\sse S_{\dl}$.  By
+ Proposition~\ref{prop-invariant}, we have
+ $u(t)\in S_\dl\sse U_{\ep_1}\sse B_{\ep}(e)\sse R$ for all
+ $t\geq 0$.  In other words, the flow line is completely contained in
+ $R$, so the function $V(u(t))$ is defined for all $t$ and is weakly
+ decreasing by Remark~\ref{rem-decreasing}.  Any nonnegative, weakly
+ decreasing function converges to a limit, so $V(u(t))$ converges to
+ some number $V_0$ as $t\to\infty$.  As $0\leq V(u(t))\leq\dl$ for
+ $t\geq 0$, we also have $0\leq V_0\leq \dl$.
+
+ Next, as $u(t)\in U_{\ep_1}$ we have $\|u(t)\|\leq \|e\|+\ep_1$ for
+ all $t\geq 0$.  This means that the sequence $(u(n))$ is bounded, so
+ by the Bolzano-Weierstrass theorem there is a subsequence $(u(n_k))$
+ that converges to some point $v\in\R^2$.  Here $\|u(n_k)-e\|<\ep_1$
+ for all $k$, so $\|v-e\|\leq\ep_1<\ep_0$, so $v\in R$.  As $V$ is
+ continuous on $R$ we have $V(u(n_k))\to V(v)$, but also
+ $V(u(t))\to V_0$, so $V(v)=V_0$.  In particular, this means that
+ $v\in S_\dl$.
+
+ Next, consider $\phi(s,v)$ for some $s>0$.  These points lie on a
+ flow line starting at the point $v\in S_\dl$ when $s=0$, so they are
+ still in $S_\dl$ by Proposition~\ref{prop-invariant}.  Note also that
+ $\phi(s,u(t))=u(s+t)$, so 
+ \[ \phi(s,v) = \lim_{k\to\infty} \phi(s,u(n_k)) = 
+     \lim_{k\to\infty} u(s+n_k),
+ \]
+ so 
+ \[ V(\phi(s,v))=\lim_{k\to\infty}V(u(s+n_k)), \]
+ but $V(u(t))\to V_0$, so $V(\phi(s,v))=V_0$, which is independent of
+ $s$.  This means that $W(\phi(s,v))=\frac{d}{ds}V(\phi(s,v))=0$, but
+ $W$ is negative definite, so $\phi(s,v)=e$.  In particular, we can
+ take $s=0$, and we get $v=e$, so $V_0=V(v)=V(e)=0$.  This means
+ that $V(u(t))\to 0$ as $t\to\infty$.
+
+ Finally, suppose we have another small number $\ep'>0$.  By
+ Proposition~\ref{prop-S-U}, there exists $\dl'>0$ such that
+ $S_{\dl'}\sse U_{\ep'}$.  As $V(u(t))\to 0$, we can find $T$ such
+ that $V(u(t))<\dl'$ for $t\geq T$.  This means that when $t\geq T$ we
+ have $u(t)\in S_{\dl'}\sse U_{\ep'}$, so $\|u(t)-e\|<\ep'$.  This
+ proves that $u(t)\to e$, as required.  Thus, $e$ is asymptotically
+ stable. 
+\end{proof}
+
+
+\end{document}
+

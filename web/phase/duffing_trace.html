@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <meta charset="UTF-8">
+ <title>Duffing oscillator</title>
+ <link rel="stylesheet" href="../css/MAS290.css">
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js"> 
+   MathJax.Hub.Config({
+     extensions: ["tex2jax.js"],
+     jax: ["input/TeX","output/HTML-CSS"],
+     tex2jax: {inlineMath: [["$","$"]]}
+   });
+ </script> 
+ <script type="text/javascript" src="../js/paperjs/paper.js"></script>
+ <script type="text/javascript" src="../js/ode.js"></script>
+ <script type="text/paperscript" canvas="canvas">
+
+var duffing = ode.create();
+
+duffing.x_min = -2.5;
+duffing.x_max =  2.5;
+duffing.y_min = -3;
+duffing.y_max =  2.5;
+duffing.x_scale = 80;
+duffing.y_scale = 80;
+duffing.t_scale = 0.4;
+duffing.display_digits = 4;
+
+duffing.trace_x_shift = 340;
+duffing.trace_y_shift = 0;
+duffing.trace_t_scale = 25;
+duffing.trace_v_scale = 40;
+duffing.trace_t_max = 18;
+duffing.trace_t_tick_gap = 5;
+duffing.trace_t_tick_size = 0.05;
+duffing.trace_v_min = -5;
+duffing.trace_v_max =  5;
+duffing.trace_t_padding = 3;
+duffing.trace_v_padding = 0.05;
+
+duffing.update_walker = function(w,dt) {
+ var x0 = w.x;
+ var y0 = w.y;
+
+ var dx = y0*dt+(-0.5*x0*x0*x0+x0)*dt*dt;
+ var dy = (-x0*x0*x0+2*x0)*dt+(-1.5*x0*x0*y0+y0)*dt*dt;
+ this.translate_walker(w,dx,dy,dt);
+};
+
+//////////////////////////////////////////////////////////////////////
+
+var L = Object.create(duffing);
+L.create_group();
+L.create_walker();
+L.fetch_lines('duffing_lines.json');
+L.set_display();
+
+L.create_trace_group();
+
+function onFrame(event) { L.on_frame(event); }
+function onMouseDown(event) { L.on_mouse_down(event); }
+
+ </script>
+</head>
+<body>
+ <table>
+ <tr>
+  <td class="command" width="100" onclick="location='../index.html'">Home</td>
+  <td class="command" width="200" onclick="location='index.html'">List of phase portraits</td>
+  <td class="command" width="150" onclick="location='duffing.html'">Phase portrait only</td>
+ </tr>
+ </table>
+ <h1>The Duffing oscillator</h1>
+<table>
+ <tr>
+  <td>
+   <canvas id="canvas" width="900" height="450"></canvas>
+  </td>
+  <td valign="top">
+   \begin{align*}
+    \dot{x} &= y \\
+    \dot{y} &= 2x-x^3.
+   \end{align*}
+   <br/><br/><br/><br/>
+   <table>
+    <tr>
+     <td>$x=$</td>
+     <td align="right"><span id="display_x" style="color:red"></span></td>
+    </tr>
+    <tr>
+     <td>$y=$</td>
+     <td align="right"><span id="display_y" style="color:blue"></span></td>
+    </tr>
+    <tr>
+     <td>$\dot{x}=$</td>
+     <td align="right"><span id="display_x_dot"></span></td>
+    </tr>
+    <tr>
+     <td>$\dot{y}=$</td>
+     <td align="right"><span id="display_y_dot"></span></td>
+    </tr>
+   </table>
+  </td>
+ </tr>
+</table>
+ <div style="width:800px">
+ The <em>Duffing oscillator</em> is the system $\dot{x}=y$ and
+ $\dot{y}=2x-x^3$; it is used to model various kinds of oscillations
+ in electrical engineering.  The $x$-nullcline is the line $y=0$.  The
+ $y$-nullcline is given by $2x-x^3=0$, which means that $x=0$ or
+ $x=\pm\sqrt{2}$.  Thus, there are three equilibrium points:
+ \[ u_1 = (0,0) \qquad u_2 = (\sqrt{2},0) \qquad u_3 = (-\sqrt{2},0). \]
+ The Jacobian is 
+ \[ J = \left[\begin{array}{cc} \partial f/\partial x & \partial f/\partial y \\
+             \partial g/\partial x & \partial g/\partial y \end{array}\right]
+      = \left[\begin{array}{cc} 0 & 1 \\
+             2-3x^2 & 0 \end{array}\right].
+ \]
+ At $u_1$ this becomes $J=\left[\begin{array}{cc} 0&1\\2&0\end{array}\right]$, which has $\tau=0$ and
+ $\delta=-2<0$, indicating a saddle.  It is easy to see that the vectors
+ $\left[\begin{array}{cc} 1\\\sqrt{2}\end{array}\right]$ and $\left[\begin{array}{cc} 1\\-\sqrt{2}\end{array}\right]$ are eigenvectors
+ with eigenvalues $\pm\sqrt{2}$.  
+
+ At $u_2$ or $u_3$ we have $J=\left[\begin{array}{cc} 0&1\\-4&0\end{array}\right]$, which has trace
+ $\tau=0$ and determinant $\delta=4>0$.  This means that the
+ linearization has a centre, and so suggests (but does not prove) that
+ the original system has a centre.  Now consider the function 
+ \[ V = 2y^2+x^4-4x^2+4 = 2y^2+(x^2-2)^2. \]
+ We have
+ \[ \dot{V} = 4y\dot{y} - 4x^3\dot{x}-8x\dot{x} 
+            = 4y(2x-x^3)-4x^3y-8xy = 0, 
+ \]
+ so $V$ is a conserved quantity.  Consider a point $(x,y)=(\sqrt{2}+a,b)$
+ close to $u_2$, so $a$ and $b$ are small.  We then have
+ \[ V = 8a^2 + 2b^2 + \text{terms of higher order}. \]
+ Using this, we see that $u_2$ is indeed a centre, and essentially the
+ same argument works for $u_3$ as well.
+
+ </div>
+</body>
+</html>

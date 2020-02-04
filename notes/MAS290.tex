@@ -1,0 +1,410 @@
+\documentclass[reqno]{amsart}
+%\usepackage{hyperref}
+\usepackage{fullpage}
+\usepackage{amsrefs}
+\usepackage{verbatim}
+\usepackage{tikz}
+\usepackage{graphicx}
+
+\newif\ifscreen
+\newif\iftwo
+\newif\ifshowall
+\newif\ifshowkeys
+\screenfalse
+\twotrue
+\showallfalse
+\showkeystrue
+
+\input xypic
+
+\ifshowkeys
+\newcommand{\lbl}[1]{\label{#1}\textup{[\texttt{#1}]}\ \\}
+\else
+\newcommand{\lbl}{\label}
+\fi
+
+\input{../macros/macros}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{conj}[theorem]{Conjecture}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{predefinition}[theorem]{Predefinition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{algorithm}[theorem]{Algorithm}
+\newtheorem{method}[theorem]{Method}
+\newtheorem{fact}[theorem]{Fact}
+% Exercises are numbered separately
+\newtheorem{exercise}{Exercise}[section]
+
+%\renewenvironment{solution}{\SolutionAtEnd}{\endSolutionAtEnd}
+%\renewenvironment{solution}{\SolutionHidden}{\endSolutionHidden}
+
+\newwrite\refs
+\openout\refs=\jobname.refs
+\makeatletter
+\renewcommand\@setref[3]{%
+        \ifx#1\relax
+                \write\refs{'#3' \thepage\space undefined}%
+                \protect \G@refundefinedtrue
+                \nfss@text{\reset@font\bfseries ??}%
+                \@latex@warning{Reference `#3' on page \thepage\space
+                                undefined}%
+        \else
+                \begingroup
+                \count@\expandafter\@secondoftwo#1\relax
+                \ifnum\c@page<\count@
+                        \write\refs{'#3' \thepage\space
+                                    \expandafter\@secondoftwo#1}%
+                \fi
+                \endgroup
+                \expandafter#2#1\null
+        \fi
+}
+\makeatother
+
+\newcommand{\dfn}[1]{\emph{{#1}}\index{#1}}
+\newcommand{\idx}[1]{{#1}\index{#1}}
+
+\makeindex
+
+\begin{document}
+
+\title{MAS290 Methods for Differential Equations}
+\author{Neil Strickland}
+
+\maketitle
+
+\tableofcontents 
+
+\section{Introduction}
+\label{sec-intro}
+
+\section{First order autonomous ODEs}
+
+In this section we discuss systems of differential equations like these.
+
+\begin{example}
+ Suppose that the number of fish in the sea is $F$, and the number of
+ sharks is $S$.  The sharks breed, the fish breed, and the sharks eat
+ the fish.  The rates of change of $F$ and $S$ are given by 
+ \[ \frac{dF}{dt} = (\al - \bt S)F \hspace{5em}
+    \frac{dS}{dt} = -(\gm - \dl F)S, 
+ \]
+ for some constants $\al$, $\bt$, $\gm$ and $\dl$.  These are called
+ the \emph{Lotka Volterra equations}.  We will discuss later why they
+ are a good model.
+\end{example}
+
+\begin{example}
+ Some aspects of the weather are described by the \emph{Lorenz equations}:
+ \[ \frac{dx}{dt} = 10(y-x) \hspace{5em}
+    \frac{dy}{dt} = (28-z)x-y \hspace{5em}
+    \frac{dz}{dt} = xy - \tfrac{8}{3}z.
+ \]
+\end{example}
+
+\begin{example}
+ Perhaps explain a simplified version of the Hodgkin-Huxley model.
+\end{example}
+
+\begin{example}
+ The one-sector growth model is a complex system of differential
+ equations that relates capital investment, labour costs, interest
+ rates, savings rates, profits and similar variables.
+\end{example}
+
+\begin{itemize}
+ \item All of these are \emph{ordinary} differential equations; there
+  are derivatives with respect to time, but not with respect to other
+  variables.  This is different from the equations that govern the
+  flow of heat along an iron bar, for example.  Heat will only flow if
+  some parts of the bar are hotter than others, so the equations
+  involve the derivatives of temperature with respect to position as
+  well as with respect to time.  Equations like this are called
+  \emph{partial differential equations}; you will study them in later
+  courses.
+ \item All the above equations are of \emph{first order}; on the left
+  hand side we have only the first derivative $dx/dt$, not higher
+  derivatives like $d^2x/dt^2$.  This is different from most of the
+  equations of physics, which usually involve acceleration, which is a
+  second derivative.  However, there is a way to convert second order
+  equations to first order systems, which we will discuss later.
+ \item All the above equations are \emph{deterministic}; there are no
+  random effects.  The theory of \emph{stochastic differential
+   equations} includes random effects, which are important in
+  economics and finance.  You will be able to study these in your
+  final year in Sheffield.
+ \item All the above equations are \emph{autonomous}; they do not
+  include external effects.  For example, a more realistic description
+  of populations of sharks and fish would include the external effect
+  of humans catching fish.
+\end{itemize}
+
+\section{Review of differential equations in one variable}
+
+Suppose that we have a variable $x$ that depends on a variable $t$,
+and we write $\dot{x}$ for $dx/dt$.  If we know that $x(t)$ satisfies
+a differential equation like $\dot{x}(t)=f(x(t))$, then we may be able
+to deduce a formula for $x(t)$.
+
+\begin{example}
+ Suppose we know that $\dot{x}=\lm x$ for some constant $\lm$, and
+ that $x=x_0$ when $t=0$.  It is then well-known that
+ $x=e^{\lm t}x_0$ for all $t$.  To check this, put $y=e^{-\lm t}x$.
+ Using the product rule and the equation $\dot{x}=\lm x$ we get
+ \[ \dot{y}=\frac{d}{dt}(e^{-\lm t}x) = 
+     x \frac{d}{dt} e^{-\lm t} + e^{-\lm t} \frac{dx}{dt} = 
+     -\lm x e^{-\lm t} + e^{-\lm t}\lm x = 0.
+ \]
+ As $\dot{y}=0$, we see that $y$ is constant.  At $t=0$ we have
+ $y=e^0x_0=x_0$, so we must have $y=x_0$ for all time.  As
+ $e^{-\lm t}x=y=x_0$, it follows that $x=e^{\lm t}x_0$ as claimed.
+
+ We will need to recall the shape of the graph of $e^{\lm t}$.  If
+ $\lm>0$, then it looks like the picture on the left below. It is
+ always positive, and never crosses the $x$-axis.  As
+ $t\to +\infty$, the function $e^{\lm t}$ grows large very quickly.
+ \begin{center}
+  \begin{tikzpicture}
+   \begin{scope}
+    \draw[->] (-2.1,0) -- (2.1,0);
+    \draw[->] (0,-0.1) -- (0,4.1);
+    \draw[red,domain=-2:2,samples=300,smooth,variable=\x]
+     plot({\x},{0.5*exp(\x)});
+    \draw (-1,3.8) node{$\lm > 0$};
+   \end{scope}
+   \begin{scope}[xshift=8cm]
+    \draw[->] (-2.1,0) -- (2.1,0);
+    \draw[->] (0,-0.1) -- (0,4.1);
+    \draw[red,domain=-2:2,samples=300,smooth,variable=\x]
+     plot({\x},{0.5*exp(-\x)});
+    \draw (1,3.8) node{$\lm < 0$};
+   \end{scope}
+  \end{tikzpicture}
+ \end{center}
+ If $\lm<0$ then the graph of $e^{\lm t}$ looks like the picture on
+ the right above.  Again, it is always positive, and never crosses the
+ $x$-axis.  It approaches zero as $t\to +\infty$.
+\end{example}
+
+\begin{example}
+ If $\dot{x}=\sqrt{x}$ then it works out that $x=(t+c)^2/4$ for some
+ constant $c$.  To see this, put $y=2\sqrt{x}=2x^{1/2}$, so $x=y^2/4$.
+ We then have 
+ \[ \dot{y} = 2 \tm \half \tm x^{\half - 1} \dot{x}
+     = x^{-1/2} \dot{x} = x^{-1/2} x^{1/2} = 1.
+ \]
+ This means that $y=t+c$ for some constant $c$, so $x=(t+c)^2/4$.
+\end{example}
+
+\begin{remark}
+ The above two examples ($\dot{x}=\lm x$ and $\dot{x}=\sqrt{x}$) are
+ first order differential equations in one variable.  \emph{First
+  order} means that only the first derivative $\dot{x}=dx/dt$ is
+ involved, not the second derivative $\ddot{x}=d^2x/dt^2$ or any
+ higher derivatives.  An example of a second order equation is
+ $\ddot{x}+\om^2x=0$, with solution $x=A\cos(\om t)+B\sin(\om t)$.  In
+ the first half of this course we will mostly study first order
+ equations.  
+\end{remark}
+
+\begin{remark}
+ The equations $\dot{x}=\lm x$ and $\dot{x}=\sqrt{x}$ are also
+ \emph{autonomous}, which means that the variable $t$ does not appear
+ explicitly.  An example of a non-autonomous equation is
+ $\dot{x}=x+t$, with solution $x=Ae^t-1-t$.  In this course we will
+ mainly study autonomous equations.
+\end{remark}
+
+\begin{definition}
+ Consider a second order, autonomous differential equation
+ $\ddot{x}+b\dot{x}+cx=0$.  The \emph{auxiliary polynomial} is
+ $p(\lm)=\lm^2+b\lm+c=0$.  The roots of the equation $p(\lm)=0$ are
+ $(-b\pm\sqrt{b^2-4c})/2$. 
+ \begin{itemize}
+  \item[(a)] If $b^2\geq 4c$ then the roots
+   $\lm_1=(-b-\sqrt{b^2-4c})/2$ and $\lm_2=(-b+\sqrt{b^2-4c})/2$ are
+   both real numbers.
+  \item[(b)] If $b^2<4c$ then the numbers $\lm=-b/2$ and
+   $\om=\sqrt{4c-b^2}/2$ are real, and the two roots of the auxiliary
+   equation are $\lm-i\om$ and $\lm+i\om$.  We call $\lm$ the
+   \emph{growth rate}, and $\om$ the \emph{angular frequency}.
+ \end{itemize}
+\end{definition}
+
+\begin{proposition}\leavevmode
+ \begin{itemize}
+  \item[(a)] If $b^2\geq 4c$ then the solutions of the equation
+   $\ddot{x}+b\dot{x}+cx=0$ are of the form
+   $x=A_1e^{\lm_1t}+A_2e^{\lm_2t}$ (where $A_1$ and $A_2$ are real
+   constants). 
+  \item[(b)] If $b^2<4c$ then the solutions are of the form
+   $(B\cos(\om t)+C\sin(\om t))e^{\lm t}$ (where $B$ and $C$ are real
+   constants). 
+ \end{itemize}
+\end{proposition}
+\begin{proof}
+ The first thing is to prove that the above formulae do in fact
+ satisfy the equation $\ddot{x}+b\dot{x}+cx=0$.  In case~(a) we have
+ \begin{align*}
+  x        &= A_1e^{\lm_1t} + A_2e^{\lm_2t} \\
+  \dot{x}  &= A_1\lm_1e^{\lm_1t} + A_2\lm_2e^{\lm_2t} \\
+  \ddot{x} &= A_1\lm_1^2e^{\lm_1t} + A_2\lm_2^2e^{\lm_2t} \\
+  \ddot{x}+b\dot{x}+cx &= 
+   A_1(\lm_1^2+b\lm_1+c)e^{\lm_1t} + A_2(\lm_2^2+b\lm_2+c)e^{\lm_2t} \\
+    &= A_1p(\lm_1)e^{\lm_1t} + A_2p(\lm_2)e^{\lm_2t} = 0,
+ \end{align*}
+ as required.  In case~(b), we recall that 
+ \begin{align*}
+  \cos(\om t) &= (e^{i\om t}+e^{-i\om t})/2 \\
+  \sin(\om t) &= -i(e^{i\om t}-e^{-i\om t})/2,
+ \end{align*}
+ so 
+ \begin{align*}
+  x &= (B\cos(\om t)+C\sin(\om t))e^{\lm t} \\
+    &= (Be^{i\om t}+Be^{-i\om t}-iCe^{i\om t}+iCe^{-i\om t})e^{\lm t}/2 \\
+    &= \frac{B-iC}{2}e^{(\lm+i\om)t} + \frac{B+iC}{2}e^{(\lm-i\om)t}.
+ \end{align*}
+ In other words, if we put $A_1=(B-iC)/2$ and $A_2=(B+iC)/2$ and
+ $\lm_1=\lm+i\om$ and $\lm_2=\lm-i\om$, then $\lm_1$ and $\lm_2$ are
+ the roots of the auxiliary polynomial, and
+ $x=A_1e^{\lm_1t}+A_2e^{\lm_2t}$.  Thus, we have
+ $\ddot{x}+b\dot{x}+cx=0$ just as in case~(a); the only difference is
+ that some of the numbers involved are complex, but that does not
+ matter. 
+
+ The more difficult problem is to prove that \emph{every} solution has
+ the form described above.  Suppose that $x(t)$ is a function of $t$
+ such that $\ddot{x}+b\dot{x}+cx=0$.  Let $\lm_1$ and $\lm_2$ be the
+ roots of the auxiliary polynomial, so 
+ \[ t^2+bt+c = (t-\lm_1)(t-\lm_2) = t^2-(\lm_1+\lm_2)t+\lm_1\lm_2, \]
+ so $\lm_1+\lm_2=-b$ and $\lm_1\lm_2=c$.  Put
+ \begin{align*}
+  P_1(t) &= e^{-\lm_1t}(\dot{x}(t) - \lm_2 x(t)) \\
+  P_2(t) &= e^{-\lm_2t}(\dot{x}(t) - \lm_1 x(t)).
+ \end{align*}
+ We then have
+ \begin{align*}
+  \dot{P}_1 &= 
+   -\lm_1 e^{-\lm_1t}(\dot{x} - \lm_2 x) + 
+    e^{-\lm_1t}(\ddot{x} - \lm_2\dot{x}) \\
+   &= e^{-\lm_1t}(\ddot{x} - (\lm_1+\lm_2)\dot{x} +\lm_1\lm_2 x) 
+    = e^{-\lm_1t}(\ddot{x} + b\dot{x} + cx)
+    = 0. 
+ \end{align*}
+ Thus, $P_1$ is actually constant.  By a similar calculation, $P_2$ is
+ also constant.  We can also rearrange the definition of $P_1$ and
+ $P_2$ to get
+ \begin{align*}
+  \dot{x} - \lm_2 x &= P_1 e^{\lm_1t} \\
+  \dot{x} - \lm_1 x &= P_2 e^{\lm_2t}.
+ \end{align*}
+ Subtracting these equations and rearranging gives 
+ \[ x = \frac{P_1}{\lm_1-\lm_2} e^{\lm_1t} + 
+        \frac{P_2}{\lm_2-\lm_1} e^{\lm_2t}.
+ \]
+ In other words, if we put $A_1=P_1/(\lm_1-\lm_2)$ and
+ $A_2=P_2/(\lm_2-\lm_1)$ then $x=A_1e^{\lm_1t}+A_2e^{\lm_2t}$ as
+ required.  All this works perfectly well even in case~(b) where the
+ numbers $\lm_k$, $P_k$ and $A_k$ may be complex.
+\end{proof}
+
+\begin{remark}
+ In many applications, it works out that $\lm<0$ and $\om$ is much
+ larger than $|\lm|$.  In that case, the graph of the function
+ $e^{\lm t}\sin(\om t)$ is like this:
+ \begin{center}
+  \begin{tikzpicture}
+   \begin{scope}
+    \draw[->] (-0.1,0) -- (6.1,0);
+    \draw[->] (0,-1.1) -- (0,1.1);
+    \draw[red,domain=-0.1:6,samples=600,smooth,variable=\t]
+     plot({\t},{sin(1800*\t)*exp(-0.3*\t)});
+   \end{scope}
+  \end{tikzpicture}
+ \end{center}
+
+\end{remark}
+
+\section{Phase portraits}
+
+Consider a differential system 
+\[ \dot{x}(t) = f(x(t),y(t)) \hspace{ 5em }
+   \dot{y}(t) = g(x(t),y(t)).
+\]
+If we are given initial conditions $x(0)=x_0$ and $y(0)=y_0$, we can 
+solve the equations to find $x(t)$ and $y(t)$ for all $t$ (or at
+least, for some range of values of $t$).  The points $(x(t),y(t))$
+will then trace out a curve in the plane, passing through the initial
+point $(x_0,y_0)$.  If we change the initial point then we will
+usually get a different curve.  The collection of all solution curves
+(which cover the whole plane) is called the \emph{phase portrait} of
+the system.  
+
+\begin{example}
+ Phase portraits for three very simple systems are shown below.
+ \begin{center}
+  \begin{tikzpicture}[scale=1.4]
+   \begin{scope}
+    \draw (0,1.3) node {$\dot{x}=1,\;\dot{y}=0$};
+    \foreach \y in {-1,-0.9,...,1} {
+     \draw[red] (-1,\y) -- (1,\y); 
+    }
+   \end{scope}
+   \begin{scope}[xshift=4cm]
+    \draw (0,1.3) node {$\dot{x}=0,\;\dot{y}=1$};
+    \foreach \x in {-1,-0.9,...,1} {
+     \draw[red] (\x,-1) -- (\x,1); 
+    }
+   \end{scope}
+   \begin{scope}[xshift=8cm]
+    \draw (0,1.3) node {$\dot{x}=-y,\;\dot{y}=x$};
+    \foreach \r in {0.1,0.2,...,1} {
+     \draw[red] (0,0) circle(\r);
+    }
+   \end{scope}
+  \end{tikzpicture}
+ \end{center}
+ For the system $\dot{x}=1,\dot{y}=0$ the solution is just $x=x_0+t$
+ and $y=y_0$, which gives a horizontal line.  Similarly, for the
+ system $\dot{x}=0,\dot{y}=1$ the phase portrait just consists of
+ vertical lines.  For the third system, we can choose any $r\geq 0$
+ and then the functions $x=r\cos(t)$ and $y=r\sin(t)$ give a
+ solution.  The corresponding curve is a circle of radius $r$ centred
+ at the origin.  All these circles together form the phase portrait.
+\end{example}
+
+Often we can sketch the phase portrait and deduce useful information
+about the behaviour of the differential system, even if we cannot find
+a formula for the solutions.
+
+\section{Critical points}
+
+\section*{To do}
+
+In this section we consider differential equations of the form
+$\dot{x}=u(x)$, where $x\:\R\to\R^n$ and $u\:\R^n\to\R^n$.  The main
+topic is the behaviour near equilibrium points $a\in\R^n$ where
+$u(a)=0$.  We can reduce to the case where $a=0$, so 
+$u(x)\simeq Ax+O(\|x\|^2)$ for some matrix $A$.  If $x(0)=c\simeq 0$
+then for small $t$ we have $\dot{x}\simeq Ax$ so $x\simeq e^{At}c$.
+This means that $0$ is a stable equilibrium if all the eigenvalues of
+$A$ lie in the left half plane.
+
+For more global stability analysis we seek Lyapunov functions $V(x)$
+such that $V^{-1}\{0\}=0$ and $u.\nabla V<0$ away from the origin, so
+that $(V\circ x)'\leq 0$ for all solutions to our ODE.
+
+We also need to cover other material about sketching trajectories.
+
+\section{Second order linear ODEs}
+
+Here we need to cover power series methods, classification of singular
+points, Sturm-Liouville theory.
+
+\end{document}

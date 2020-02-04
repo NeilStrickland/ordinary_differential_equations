@@ -1,0 +1,394 @@
+<html>
+<head>
+ <meta charset="UTF-8">
+ <title>Linear systems</title>
+ <link rel="stylesheet" href="../css/MAS290.css">
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js"> 
+  MathJax.Hub.Config({
+     extensions: ["tex2jax.js"],
+     jax: ["input/TeX","output/HTML-CSS"],
+     tex2jax: {inlineMath: [["$","$"]]}
+   });
+ </script> 
+ <script type="text/javascript" src="linear_2d.js"></script>
+ <script type="text/javascript" src="../js/paperjs/paper.js"></script>
+ <script type="text/paperscript" canvas="canvas">
+
+var group = new Group();
+var loci = {};
+
+group.transformContent = false;
+group.translate(120,20);
+group.scale(2.5,2.5);
+
+loci.saddle = new Path([-100,100],[100,100],[100,130],[-100,130]);
+loci.saddle.closed = true;
+loci.saddle.strokeColour = 'white';
+loci.saddle.fillColor = 'yellow';
+
+loci.stable_node = 
+ new Path([-100,0],[-90,19],[-80,36],[-70,51],[-60,64],[-50,75],
+          [-40,84],[-30,91],[-20,96],[-10,99],[0,100],[-100,100]);
+loci.stable_node.closed = true;
+loci.stable_node.strokeColour = 'white';
+loci.stable_node.fillColor = 'yellow';
+
+loci.unstable_node = 
+ new Path([100,0],[90,19],[80,36],[70,51],[60,64],[50,75],
+          [40,84],[30,91],[20,96],[10,99],[0,100],[100,100]);
+loci.unstable_node.closed = true;
+loci.unstable_node.strokeColour = 'white';
+loci.unstable_node.fillColor = 'yellow';
+
+loci.stable_focus = 
+ new Path([-100,0],[-90,19],[-80,36],[-70,51],[-60,64],[-50,75],
+          [-40,84],[-30,91],[-20,96],[-10,99],[0,100],[0,0]);
+loci.stable_focus.closed = true;
+loci.stable_focus.strokeColour = 'white';
+loci.stable_focus.fillColor = 'yellow';
+
+loci.unstable_focus = 
+ new Path([100,0],[90,19],[80,36],[70,51],[60,64],[50,75],
+          [40,84],[30,91],[20,96],[10,99],[0,100],[0,0]);
+loci.unstable_focus.closed = true;
+loci.unstable_focus.strokeColour = 'white';
+loci.unstable_focus.fillColor = 'yellow';
+
+loci.semistable_node = new Path([-100,100],[0,100]);
+loci.semistable_node.strokeColor = 'cyan';
+
+loci.semiunstable_node = new Path([ 100,100],[0,100]);
+loci.semiunstable_node.strokeColor = 'orange';
+
+loci.improper_stable_node =
+ new Path([-100,0],[-90,19],[-80,36],[-70,51],[-60,64],[-50,75],[-40,84],[-30,91],[-20,96],[-10,99],[0,100]);
+loci.improper_stable_node.smooth();
+loci.improper_stable_node.strokeColor = 'blue';
+
+loci.improper_unstable_node =
+ new Path([100,0],[90,19],[80,36],[70,51],[60,64],[50,75],[40,84],[30,91],[20,96],[10,99],[0,100]);
+loci.improper_unstable_node.strokeColor = 'red';
+
+loci.centre = new Path([0,0],[0,100]);
+loci.centre.strokeColor = 'green';
+
+for (t in loci) {
+ loci[t].strokeWidth = 2;
+ loci[t].opacity = 0.3;
+ group.addChild(loci[t]);
+}
+
+var labels = [
+ [-10,0,'det'],
+ [100,105,'trace'],
+ [-90,40,'stable focus'],
+ [  0,40,'unstable focus'],
+ [-110,80,'stable node'],
+ [30,80,'unstable node'],
+ [-20,115,'saddle'],
+ [60,0,'det = trace²/4']
+];
+
+for (i in labels) {
+ a = labels[i];
+ t = new PointText({point : [a[0],a[1]], fontSize : 15, content : a[2]});
+ group.addChild(t);
+ t.scale(1/3,1/3);
+}
+
+function onMouseDown(event) {
+ var p = event.point;
+ var q = group.localToGlobal(p);
+ var selected_type = null;
+
+ for (t in loci) {
+  if (loci[t].hitTest(q)) {
+   selected_type = t;
+  }
+ }
+
+ if (! selected_type) {
+  if (q.y > 100) {
+   selected_type = 'saddle';
+  } else {
+   if (q.x * q.x + 100 * q.y < 10000) {
+    if (q.x < 0) {
+     selected_type = 'stable_focus'
+    } else {
+     selected_type = 'unstable_focus'
+    }
+   } else {
+    if (q.x < 0) {
+     selected_type = 'stable_node'
+    } else {
+     selected_type = 'unstable_node'
+    }
+   }
+  }
+ }
+
+ for (t in loci) {
+  e = document.getElementById('explain_' + t);
+
+  if (selected_type == t) {
+   loci[t].opacity = 1;
+   e.style.display = 'block';
+   console.log(e);
+   var el = document.getElementById('all');
+   el.scrollTop = 1;
+   el.scrollTop = 0;
+  } else {
+   loci[t].opacity = 0.25;
+   e.style.display = 'none';
+   var el = document.getElementById('all');
+   el.scrollTop = 1;
+   el.scrollTop = 0;
+  }
+ }
+}
+
+ </script>
+</head>
+<body id="all">
+<table>
+ <tr>
+  <td class="command" width="100" onclick="location='../index.html'">Home</td>
+ </tr>
+</table>
+
+<h1>Linear systems</h1>
+<div style="width:800px; font-size:80%">
+Consider a linear system $\dot{x}=Ax$, where $x$ is a two-dimensional vector and 
+$A$ is a $2\times 2$ matrix, say
+$A=\left[\begin{array}{cc} a&b \\ c&d\end{array}\right]$.  Many properties of the
+system are determined by numbers $\tau=\text{trace}(A)=a+d$ and $\delta=\det(A)=ad-bc$.  In
+particular, the characteristic polynomial is 
+$ \det(tI-A) = (t-a)(t-d) = t^2 - bc = \tau t + \delta, $
+so the eigenvalues are
+$ \lambda_1,\lambda_2 = 
+    (-\tau^2 \pm \sqrt{\tau^2-4\delta})/2.
+$
+This gives $\tau=\lambda_1+\lambda_2$ and $\delta=\lambda_1\lambda_2$.
+
+</div>
+
+<table>
+<tr><td>
+<canvas id="canvas" width="700" height="450"></canvas>
+</td><td style="vertical-align:top"><br/><br/><br/>
+<div id="explain_constant" class="explainer">
+If $\tau=\delta=0$, there are two possibilities.  The most
+obvious one is that $A$ is just the zero matrix, in which case the differential
+equation is just $\dot{x}=0$ so the solutions are constant and the solution 
+curves are just points.  
+<br/><br/>
+The other possibility is that $A$ is a matrix like 
+$A=\left[\begin{array}{cc} 0&1 \\ 0&0\end{array}\right]$.  The only eigenvalue is 
+$0$, and the only eigenvectors are multiples of 
+$v_1=\left[\begin{array}{cc} 1 \\ 0\end{array}\right]$.  We cannot find two 
+linearly independent eigenvectors, so the matrix cannot be diagonalized.
+The differential equation 
+$\left[\begin{array}{cc} \dot{x} \\\dot{y}\end{array}\right] = 
+ \left[\begin{array}{cc} 0&1 \\ 0&0\end{array}\right]
+ \left[\begin{array}{cc} x \\ y\end{array}\right]
+$ gives $\dot{x}=y$ and $\dot{y}=0$, so the solutions are like $x=x_0+y_0t$ and 
+$y=y_0$ for some constants $x_0$ and $y_0$.  We call this a <em>shear flow</em>.
+<br/><br/>
+<span class="button" onclick="window.open('shear_flow.html')">View shear flow</span>
+</div>
+<div id="explain_centre" class="explainer">
+The matrix $A$ gives a <em>centre</em> if $\tau=0$ and
+$\delta<0$, so the eigenvalues are of the form $\lambda_1=i\omega$
+and $\lambda_2=-i\omega$ for some real number $\omega>0$.  If so, the
+solution curves are closed ellipses centred at the origin.  They run
+anticlockwise if $b>0$, and clockwise if $b<0$.
+<br/><br/>
+<span class="button" onclick="window.open('clockwise_centre.html')">View clockwise centre</span>
+<span class="button" onclick="window.open('anticlockwise_centre.html')">View anticlockwise centre</span>
+
+</div>
+<div id="explain_improper_stable_node" class="explainer">
+If $\tau<0$ and $\delta=\tau^2/4$, then there are two 
+possibilities.  The most obvious one is that $A=\lambda I$ for some $\lambda<0$, so 
+$\tau=2\lambda$ and 
+$$ \text{det}(A)=\lambda^2=(2\lambda)^2/4=\tau^2/4. $$
+The differential equation 
+$\left[\begin{array}{cc} \dot{x} \\\dot{y}\end{array}\right] = 
+ A \left[\begin{array}{cc} x \\ y\end{array}\right]
+$ is just $\dot{x}=\lambda x$ and $\dot{y}=\lambda y$, so 
+$\left[\begin{array}{cc} x \\ y\end{array}\right] = 
+ e^{\lambda t}\left[\begin{array}{cc} x \\ y\end{array}\right]
+$.  The solution curves are straight lines running from infinity in to the
+origin.  We call this an <em>improper stable node</em>.
+<br/><br/>
+The other possibility is that $A$ is a matrix like 
+$A=\left[\begin{array}{cc} \lambda&1 \\ 0&\lambda\end{array}\right]$,
+where again $\lambda<0$.  The only eigenvalue is 
+$\lambda$, and the only eigenvectors are multiples of 
+$v_1=\left[\begin{array}{cc} 1 \\ 0\end{array}\right]$.  We cannot find two 
+linearly independent eigenvectors, so the matrix cannot be diagonalized.
+The differential equation 
+$\left[\begin{array}{cc} \dot{x} \\\dot{y}\end{array}\right] = 
+ \left[\begin{array}{cc} \lambda&1 \\ 0&\lambda\end{array}\right]
+ \left[\begin{array}{cc} x \\ y\end{array}\right]
+$ gives $\dot{x}=\lambda x+y$ and $\dot{y}=\lambda y$.  One can check that
+the solutions are like $x=(x_0+y_0t)e^{\lambda t}$ and $y=y_0e^{\lambda t}$.
+We call this a <em>degenerate stable node</em>.
+<br/><br/>
+<span class="button" onclick="window.open('improper_stable_node.html')">View improper stable node</span>
+<span class="button" onclick="window.open('degenerate_stable_node.html')">View degenerate stable node</span>
+</div>
+<div id="explain_improper_unstable_node" class="explainer">
+If $\tau>0$ and $\delta=\tau^2/4$, then there are two 
+possibilities.  The most obvious one is that $A=\lambda I$ for some $\lambda>0$, so 
+$\tau=2\lambda$ and 
+$$ \text{det}(A)=\lambda^2=(2\lambda)^2/4=\tau^2/4. $$
+The differential equation 
+$\left[\begin{array}{cc} \dot{x} \\\dot{y}\end{array}\right] = 
+ A \left[\begin{array}{cc} x \\ y\end{array}\right]
+$ is just $\dot{x}=\lambda x$ and $\dot{y}=\lambda y$, so 
+$\left[\begin{array}{cc} x \\ y\end{array}\right] = 
+ e^{\lambda t}\left[\begin{array}{cc} x \\ y\end{array}\right]
+$.  The solution curves are straight lines running from the origin out to infinity.
+We call this an <em>improper unstable node</em>.
+<br/><br/>
+The other possibility is that $A$ is a matrix like 
+$A=\left[\begin{array}{cc} \lambda&1 \\ 0&\lambda\end{array}\right]$,
+where again $\lambda>0$.  The only eigenvalue is 
+$\lambda$, and the only eigenvectors are multiples of 
+$v_1=\left[\begin{array}{cc} 1 \\ 0\end{array}\right]$.  We cannot find two 
+linearly independent eigenvectors, so the matrix cannot be diagonalized.
+The differential equation 
+$\left[\begin{array}{cc} \dot{x} \\\dot{y}\end{array}\right] = 
+ \left[\begin{array}{cc} \lambda&1 \\ 0&\lambda\end{array}\right]
+ \left[\begin{array}{cc} x \\ y\end{array}\right]
+$ gives $\dot{x}=\lambda x+y$ and $\dot{y}=\lambda y$.  One can check that
+the solutions are like $x=(x_0+y_0t)e^{\lambda t}$ and $y=y_0e^{\lambda t}$.
+We call this a <em>degenerate unstable node</em>.
+<br/><br/>
+<span class="button" onclick="window.open('improper_unstable_node.html')">View improper unstable node</span>
+<span class="button" onclick="window.open('degenerate_unstable_node.html')">View degenerate unstable node</span>
+</div>
+<div id="explain_stable_node" class="explainer">
+If $\tau<0$ and $\delta<\tau^2/4$ then we have a 
+<em>stable node</em>.  The eigenvalues 
+$\lambda_1=(\tau+\sqrt{\tau^2-4\delta})/2$ and
+$\lambda_2=(\tau-\sqrt{\tau^2-4\delta})/2$ are both 
+negative real numbers, and we can find corresponding eigenvectors $v_1$ 
+and $v_2$ that have real entries.  Let $V_1$ be the set of multiples of $v_1$, 
+and let $V_2$ be the set of multiples of $V_2$, so $V_1$ and $V_2$ are lines 
+through the origin.  The solution curves move quickly towards the line $V_1$, 
+and then move more slowly along $V_1$ towards the origin.  The formulae 
+involve $e^{\lambda_1 t}$ and $e^{\lambda_2 t}$; these tend to zero as $t$ 
+increases, because $\lambda_1$ and $\lambda_2$ are negative.
+<br/><br/>
+<span class="button" onclick="window.open('stable_node.html')">View stable node</span>
+</div>
+<div id="explain_unstable_node" class="explainer">
+If $\tau>0$ and $\delta<\tau^2/4$ then we have an 
+<em>unstable node</em>.  The eigenvalues 
+$\lambda_1=(\tau+\sqrt{\tau^2-4\delta})/2$ and
+$\lambda_2=(\tau-\sqrt{\tau^2-4\delta})/2$ are both 
+positive real numbers, and we can find corresponding eigenvectors $v_1$ 
+and $v_2$ that have real entries.  The solution curves run from the origin out
+to infinity.  The formulae involve $e^{\lambda_1 t}$ and $e^{\lambda_2 t}$; 
+these tend to infinity as $t$ increases, because $\lambda_1$ and $\lambda_2$ 
+are positive.
+<br/><br/>
+<span class="button" onclick="window.open('unstable_node.html')">View unstable node</span>
+</div>
+<div id="explain_semistable_node" class="explainer">
+If $\tau<0$ and $\delta=0$ then we say that the system is 
+<em>semistable</em>.  One eigenvalue is $\lambda_1=0$, the other is
+$\lambda_2=\tau<0$, and we can find corresponding eigenvectors 
+$v_1$ and $v_2$.  Let $V_1$ be the set of multiples of $v_1$, 
+and let $V_2$ be the set of multiples of $V_2$, so $V_1$ and $V_2$ are lines 
+through the origin.  The solution curves are straight lines parallel to $V_2$.
+They approach $V_1$ as $t$ tends to infinity, but they never actually reach $V_1$.  
+The formulae have some constant terms and some terms involving $e^{\lambda_2 t}$.
+The $e^{\lambda_2t}$ terms tend to zero as $t$ increases, because $\lambda_2<0$.
+<br/><br/>
+<span class="button" onclick="window.open('semistable_node.html')">View semistable node</span>
+</div>
+<div id="explain_semiunstable_node" class="explainer">
+If $\tau>0$ and $\delta=0$ then we say that the system is 
+<em>semiunstable</em>.  One eigenvalue is $\lambda_1=0$, the other is
+$\lambda_2=\tau>0$, and we can find corresponding eigenvectors 
+$v_1$ and $v_2$.  Let $V_1$ be the set of multiples of $v_1$, 
+and let $V_2$ be the set of multiples of $V_2$, so $V_1$ and $V_2$ are lines 
+through the origin.  The solution curves are straight lines parallel to $V_2$ 
+that run out to infinity away from $V_1$.  The formulae have some constant terms 
+and some terms involving $e^{\lambda_2 t}$.  The $e^{\lambda_2t}$ terms tend to 
+infinity as $t$ increases, because $\lambda_2>0$.
+<br/><br/>
+<span class="button" onclick="window.open('semiunstable_node.html')">View semistable node</span>
+</div>
+<div id="explain_saddle" class="explainer">
+If $\delta<0$ then we have a <em>saddle</em>.  The 
+eigenvalue $\lambda_1=(\tau+\sqrt{\tau^2-4\delta})/2$ 
+is a positive real number, and the eigenvalue
+$\lambda_2=(\tau-\sqrt{\tau^2-4\delta})/2$ is a
+negative real numbers.   We can find corresponding eigenvectors $v_1$ 
+and $v_2$ that have real entries.  Let $V_1$ be the set of multiples of $v_1$, 
+and let $V_2$ be the set of multiples of $V_2$, so $V_1$ and $V_2$ are lines 
+through the origin.  There are two solution curves that run out from the origin
+to infinity along $V_1$, one in each direction.  There are two more solution
+curves that run in from infinity to the origin along $V_2$.  Between $V_1$ and
+$V_2$ there are solution curves that come in from infinity and then turn around 
+and head back out to infinity in a different direction.  The formulae involve
+$e^{\lambda_1 t}$ and $e^{\lambda_2 t}$.  As $t$ tends to $-\infty$, the 
+$e^{\lambda_1 t}$ terms tend to zero and the $e^{\lambda_2 t}$ terms tend to 
+infinity.  As $t$ tends to $+\infty$, the 
+$e^{\lambda_2 t}$ terms tend to zero and the $e^{\lambda_1 t}$ terms tend to 
+infinity.  
+<br/><br/>
+<span class="button" onclick="window.open('saddle.html')">View saddle</span>
+</div>
+<div id="explain_stable_focus" class="explainer">
+If $\tau<0$ and $\delta>\tau^2/4$ then we have a 
+<em>stable focus</em>.  The eigenvalues are $\lambda+i\omega$ and $\lambda-i\omega$,
+where $\lambda=\tau/2<0$ and 
+$\omega=\sqrt{\delta-\tau^2/4}>0$.  The corresponding eigenvectors
+have complex entries, so we cannot draw them on our usual diagram.  The formulae
+for the solution involve the expression
+$$ e^{\lambda t\pm i\omega t} =
+    e^{\lambda t}e^{i\omega t} = 
+    e^{\lambda t}(\cos(\omega t) + i\sin(\omega t)).
+$$
+When we work out all the details we find that the imaginary parts cancel out.
+We can therefore write the solution in terms of 
+$e^{\lambda t}\cos(\omega t)$ and $e^{\lambda t}\sin(\omega t)$, with real 
+coefficients.  As $\lambda<0$, these expressions tend to zero as $t\to\infty$.
+The solution curves spiral in from infinity to the origin.  They turn 
+clockwise if $b>0$, and anticlockwise if $b<0$.
+<br/><br/>
+<span class="button" onclick="window.open('clockwise_stable_focus.html')">View clockwise stable focus</span>
+<span class="button" onclick="window.open('anticlockwise_stable_focus.html')">View anticlockwise stable focus</span>
+</div>
+<div id="explain_unstable_focus" class="explainer">
+If $\tau>0$ and $\delta>\tau^2/4$ then we have an 
+<em>unstable focus</em>.  The eigenvalues are $\lambda+i\omega$ and $\lambda-i\omega$,
+where $\lambda=\tau/2>0$ and 
+$\omega=\sqrt{\delta-\tau^2/4}>0$.  The corresponding eigenvectors
+have complex entries, so we cannot draw them on our usual diagram.  The formulae
+for the solution involve the expression
+$$ e^{\lambda t\pm i\omega t} =
+    e^{\lambda t}e^{i\omega t} = 
+    e^{\lambda t}(\cos(\omega t) + i\sin(\omega t)).
+$$
+When we work out all the details we find that the imaginary parts cancel out.
+We can therefore write the solution in terms of 
+$e^{\lambda t}\cos(\omega t)$ and $e^{\lambda t}\sin(\omega t)$, with real 
+coefficients.  As $\lambda>0$, these expressions tend to zero as $t\to\infty$.
+The solution curves spiral out to infinity from the origin.  They turn 
+clockwise if $b>0$, and anticlockwise if $b<0$.
+<br/><br/>
+<span class="button" onclick="window.open('clockwise_unstable_focus.html')">View clockwise unstable focus</span>
+<span class="button" onclick="window.open('anticlockwise_unstable_focus.html')">View anticlockwise unstable focus</span>
+</div>
+</td>
+</tr>
+</table>
+
+</body>
+</html>

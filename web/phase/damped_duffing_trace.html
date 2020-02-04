@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <meta charset="UTF-8">
+ <title>Damped Duffing oscillator</title>
+ <link rel="stylesheet" href="../css/MAS290.css">
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js"> 
+   MathJax.Hub.Config({
+     extensions: ["tex2jax.js"],
+     jax: ["input/TeX","output/HTML-CSS"],
+     tex2jax: {inlineMath: [["$","$"]]}
+   });
+ </script> 
+ <script type="text/javascript" src="../js/paperjs/paper.js"></script>
+ <script type="text/javascript" src="../js/ode.js"></script>
+ <script type="text/paperscript" canvas="canvas">
+
+var damped_duffing = ode.create();
+
+damped_duffing.x_min = -2.5;
+damped_duffing.x_max =  2.5;
+damped_duffing.y_min = -3;
+damped_duffing.y_max =  2.5;
+damped_duffing.x_scale = 80;
+damped_duffing.y_scale = 80;
+damped_duffing.t_scale = 0.4;
+damped_duffing.display_digits = 4;
+
+damped_duffing.trace_x_shift = 340;
+damped_duffing.trace_y_shift = 0;
+damped_duffing.trace_t_scale = 25;
+damped_duffing.trace_v_scale = 40;
+damped_duffing.trace_t_max = 18;
+damped_duffing.trace_t_tick_gap = 5;
+damped_duffing.trace_t_tick_size = 0.05;
+damped_duffing.trace_v_min = -5;
+damped_duffing.trace_v_max =  5;
+damped_duffing.trace_t_padding = 3;
+damped_duffing.trace_v_padding = 0.05;
+
+damped_duffing.update_walker = function(w,dt) {
+ var x0 = w.x;
+ var y0 = w.y;
+
+ var dx = y0*dt+(-0.5*x0*x0*x0+x0-0.05*y0)*dt*dt;
+ var dy = (-x0*x0*x0+2*x0-0.1*y0)*dt+(-1.5*x0*x0*y0+1.005*y0-0.1*x0+0.05*x0*x0*x0)*dt*dt;
+
+ this.translate_walker(w,dx,dy,dt);
+};
+
+//////////////////////////////////////////////////////////////////////
+
+var L = Object.create(damped_duffing);
+L.create_group();
+L.create_walker();
+L.fetch_lines('damped_duffing_lines.json');
+L.set_display();
+
+L.create_trace_group();
+
+function onFrame(event) { L.on_frame(event); }
+function onMouseDown(event) { L.on_mouse_down(event); }
+
+ </script>
+</head>
+<body>
+ <table>
+ <tr>
+  <td class="command" width="100" onclick="location='../index.html'">Home</td>
+  <td class="command" width="200" onclick="location='index.html'">List of phase portraits</td>
+  <td class="command" width="150" onclick="location='damped_duffing.html'">Phase portrait only</td>
+ </tr>
+ </table>
+ <h1>The damped Duffing oscillator</h1>
+<table>
+ <tr>
+  <td>
+   <canvas id="canvas" width="900" height="420"></canvas>
+  </td>
+  <td valign="top">
+   \begin{align*}
+    \dot{x} &= y \\
+    \dot{y} &= 2x-x^3-0.1y.
+   \end{align*}
+   <br/><br/><br/><br/>
+   <table>
+    <tr>
+     <td>$x=$</td>
+     <td align="right"><span id="display_x" style="color:red"></span></td>
+    </tr>
+    <tr>
+     <td>$y=$</td>
+     <td align="right"><span id="display_y" style="color:blue"></span></td>
+    </tr>
+    <tr>
+     <td>$\dot{x}=$</td>
+     <td align="right"><span id="display_x_dot"></span></td>
+    </tr>
+    <tr>
+     <td>$\dot{y}=$</td>
+     <td align="right"><span id="display_y_dot"></span></td>
+    </tr>
+   </table>
+  </td>
+ </tr>
+</table>
+</body>
+</html>

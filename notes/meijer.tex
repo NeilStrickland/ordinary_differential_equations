@@ -1,0 +1,301 @@
+\documentclass{amsart}
+\usepackage{hyperref}
+\usepackage{fullpage}
+\usepackage{amsrefs}
+
+\usepackage[matrix,arrow]{xy}
+\usepackage{xypdf}
+\newdir{ >}{{}*!/-9pt/\dir{>}}
+
+\newcommand{\Map}       {\operatorname{Map}}
+
+\newcommand{\ann}       {\operatorname{ann}}
+
+\newcommand{\Z}         {{\mathbb{Z}}}
+\newcommand{\C}         {{\mathbb{C}}}
+
+\newcommand{\al}        {\alpha}
+\newcommand{\bt}        {\beta} 
+\newcommand{\dl}        {\delta}
+
+\newcommand{\Gm}        {\Gamma}
+\newcommand{\Dl}        {\Delta}
+
+\newcommand{\sm}        {\setminus}
+\newcommand{\st}        {\;|\;}
+\newcommand{\tE}	{\widetilde{E}}
+\newcommand{\tm}        {\times}
+\renewcommand{\:}{\colon}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{construction}[theorem]{Construction}
+
+\newtheorem{notation}{Notation}
+\renewcommand{\thenotation}{} % make the notation environment unnumbered
+
+%\numberwithin{equation}{subsection}
+
+\begin{document}
+\title{Meijer $G$-functions}
+\author{N.~P.~Strickland}
+
+\maketitle 
+
+\begin{definition}
+ We write $W$ for the Weyl algebra generated over $\C$ by $z$ and
+ $\partial$ subject to the relation $[\partial,z]=1$.  We give this a
+ grading with $|z|=1$ and $|\partial|=-1$.  We put
+ $\Dl=z\,\partial\in W_0$. 
+\end{definition}
+
+\begin{remark}
+ It is not hard to see that $\{\Dl^k\st k\geq 0\}$ and
+ $\{z^k\partial^k\st k\geq 0\}$ are both bases for $W_0$ over $\C$.
+\end{remark}
+
+\begin{definition}
+ We put $M=W_1+W_0$, which is a bimodule for $W_0$.  We call the
+ elements of $M$ \emph{Meijer operators}.  Any such operator can be
+ written in the form $L=z\,f(\Dl)-g(\Dl)$ for some polynomials $f$ and
+ $g$.  The \emph{bidegree} of $L$ is the pair $(\deg(f),\deg(g))$
+ (with the convention $\deg(0)=-\infty$). 
+\end{definition}
+
+We will study the sets $\ann(L,U)=\{u\in U\st Lu=0\}$ for various
+$W$-modules $U$:
+\begin{definition}\leavevmode
+ \begin{itemize}
+  \item[(a)] We write $H$ for the space of holomorphic functions
+   $u(z)$ on $\C^\tm$, with $\partial$ acting as differentiation and
+   $z$ acting as multiplication by the identity function.  We call
+   this the \emph{holomorphic module}.
+  \item[(b)] We write $S$ for the space of doubly infinite sequences
+   $(a_k)_{k\in\Z}$ that are rapidly decreasing in the sense that 
+   $|k^Na_k|\to 0$ as $|k|\to\infty$ for all $N\geq 0$.  This can be
+   regarded as a $W$-module by the rules $(\partial a)_k=(k+1)a_{k+1}$
+   and $(za)_k=a_{k-1}$ (so $(\Dl a)_k=k\,a_k$).  We also write $S_0$
+   for the subset of sequences where $a_k=0$ for $|k|\gg 0$.  We call
+   this the \emph{series module}.
+  \item[(c)] We write $E$ for the space of holomorphic functions
+   $m(t)$ on $\C$, with $\partial$ acting as $e^{-t}\frac{d}{dt}$ and
+   $z$ as multiplication by $e^t$.  We call this the \emph{exponential
+   module}.
+  \item[(d)] We write $F$ for the space of meromorphic functions
+   $v(s)$ on $\C$, with $\Dl$ acting as multiplication by $s$,
+   and $z$ acting as the shift operator $(zv)(s)=v(s-1)$.  We call
+   this the \emph{Mellin module}.
+ \end{itemize}
+\end{definition}
+
+\begin{remark}
+ The exponential module is useful because $\exp\:\C\to\C^\tm$ is a
+ universal cover and it turns out that this is sufficient to handle
+ all monodromy issues for operators of bidegree $(p,q)$ with
+ $p\neq q$.  If $p=q$ then certain relevant functions will have a pole
+ at $z=1$ as well as $z\in\{0,\infty\}$ so we need to consider the
+ universal cover of $\C\sm\{0,1\}$ by the elliptic modular function
+ instead.  We will return to this later.
+\end{remark}
+
+\begin{definition}
+ We define $\tau\:E\to E$ by $(\tau m)(t)=m(t+2\pi i)$.  For
+ $\al\in\C^\tm$ we put 
+ \begin{align*}
+  E_\al &= \ker(\tau-\al) =
+            \{m\in E\st m(t+2\pi i)=\al\,m(t)\text{ for all } t\}\\
+  \tE_\al &= \bigcup_{n\geq 0}\ker((\tau-\al)^n)
+           = \C[t].E_\al
+ \end{align*}
+\end{definition}
+
+We can consider various homomorphisms between the above modules.
+\begin{itemize}
+ \item[(a)] Taylor expansion gives an injective homomorphism
+  $\tau\:H\to S$.  In fact, it is well-known that the Fourier
+  transform gives an isomorphism from $S$ to the space of smooth
+  functions on the circle, and this converts $\tau$ to the obvious
+  restriction map.
+ \item[(b)] Identifying $z$ with $e^t$ gives an isomorphism between
+  $H$ and $E_0<E$.
+ \item[(c)] Given a function $v(s)\in F$ we can choose a contour $C$
+  in the Riemann sphere and attempt to define
+  $u(z)=\oint_C v(s)\,z^s\,ds$, but this can fail in various ways to
+  be well-defined.  This construction should give a homomorphism
+  between certain groups related to $H$ and $F$, called the
+  \emph{Mellin transform}.  However, I  am not yet sure of the best
+  formulation for this.   
+\end{itemize}
+
+\begin{proposition}
+ If $L$ has bidegree $(p,q)$ with $p<q$ then $\ann(L,E)$ has dimension
+ $q$ over $\C$.
+\end{proposition}
+\begin{proof}
+ We have $L=zF-G$, where $F\sum_{k=0}^pa_kz^k\partial^k$ and
+ $G=\sum_{k=0}^qb_kz^k\partial^k$ say with $a_p,b_q\neq 0$.  This
+ means that $L$ acts on $E$ as the operator
+ \[ e^t \sum_{k=0}^p a_k\frac{d^k}{dt^k} - 
+              \sum_{k=0}^q b_k\frac{d^k}{dt^k}.
+ \]
+ This is $-b_q$ times a monic polynomial of degree $q$ in
+ $\frac{d}{dt}$, with holomorphic coefficients.  The standard
+ Frobenius method now shows that for any $t_0$, the kernel of $L$ on
+ holomorphic germs at $t_0$ has dimension $q$.  The spaces of local
+ solutions form a vector bundle with flat connection over the simply
+ connected space $\C$, so the evident map from global solutions to
+ germs at $0$ is an isomorphism.
+\end{proof}
+
+\begin{corollary}
+ If $L$ has bidegree $(p,q)$ with $p>q$ then $\ann(L,E)$ has dimension
+ $p$ over $\C$.
+\end{corollary}
+\begin{proof}
+ If $L=zf(\Dl)-g(\Dl)$, put $L^*=zg(-\Dl)-f(-\Dl)$.  The proposition
+ shows that $\ann(L^*,E)$ has dimension $p$, and one can check that
+ composition with $t\mapsto -t$ gives an isomorphism
+ $\ann(L,E)\simeq\ann(L^*,E)$. 
+\end{proof}
+
+\begin{corollary}
+ If $L$ has bidegree $(p,q)$ with $p\neq q$ then
+ $\ann(L,E)=\bigoplus_{\al\neq 0}(\ann(L,\tE_\al))$. 
+\end{corollary}
+\begin{proof}
+ It is not hard to see that $\ann(L,E)$ is preserved by $\tau$.  As
+ $\ann(L,E)$ is also finite-dimensional, it must split as a direct sum
+ of its generalised eigenspaces.  Note also that $\tau$ is invertible,
+ so all eigenvalues are nonzero.  The claim is clear from this.
+\end{proof}
+
+We now study the spaces $K=\ann(L,S)$ and $K_0=K\cap S_0$, where again
+$L=zf(\Dl)-g(\Dl)$ has bidegree $(p,q)$.  Put $P=\{n\in\Z\st f(n)=0\}$
+and $Q=\{n\in\Z\st g(n)=0\}$ (so $|P|\leq p$ and $|Q|\leq q$, and
+often $P$ and $Q$ will be empty).  Suppose for the moment that $p<q$.
+If $P=\emptyset$ we will show that $K=K_0=0$.  If $P\neq\emptyset$
+then the most common situation is that $\dim(K)=1$ and $\dim(K_0)=0$,
+but it will take a little work to formulate a precise statement.  We
+put 
+\[ R = \{i\in\Z\st \exists j\in P \text{ with }
+          j > i \text{ and } \{i,i+1,\dotsc,j-1\}\cap Q=\emptyset
+   \}.
+\]
+
+\begin{proposition}\label{prop-ann-S}\leavevmode
+ \begin{itemize}
+  \item[(a)] The restriction map $K\to\Map(R,\C)$ is zero.
+  \item[(b)] The restriction map $K\to\Map(P\sm R,\C)$ is an
+   isomorphism.
+  \item[(c)] We have $\dim(K)=|P\sm R|\leq\min(|P|,|Q|+1)$.
+  \item[(d)] If $\max(P)\leq\max(Q)$ then $K=K_0$.  Otherwise there is a
+   unique element $b\in K$ with $b_{\max(P)}=1$ and $b_i=0$ for
+   $i<\max(P)$, and we have $K=K_0\oplus\C b$.
+ \end{itemize}
+\end{proposition}
+\begin{proof}
+ First note that $K$ is just the space of rapidly decreasing sequences
+ $a$ satisfying $f(k-1)a_{k-1}=g(k)a_k$ for all $k$.   
+
+ Suppose that $a\in K$ and $i\in R$, so there exists $j>i$ with
+ $g(j)=0$ and $f(k)\neq 0$ for $i\leq k<j$.  The recurrence relation
+ gives 
+ \[ f(i)f(i+1)\dotsb f(j-1)a_i = g(i+1)g(i+2)\dotsb g(j)a_j, \]
+ from which we deduce that $a_i=0$.  This proves~(a).
+
+ Next, note that for $k\ll 0$ we will have $f(k-1),g(k)\neq 0$ so we
+ can write the recurrence relation as $a_{k-1}=a_k\,g(k)/f(k-1)$.  As
+ $p<q$ we have $|g(k)/f(k-1)|\to\infty$ as $k\to -\infty$.  Thus, the
+ only way the sequence can be rapidly decreasing is if $a_k=0$ for
+ $k\ll 0$.  Now suppose that $a_{k-1}=0$; we claim that $a_k$ is also
+ zero.  If $k\in R$ then this holds by part~(a), if $k\in P\sm R$ then
+ it holds by assumption, and if $k\not\in P$ then it follows from the
+ relation $f(k-1)a_{k-1}=g(k)a_k$.  It now follows by induction that
+ $a=0$, so the restriction $K\to\Map(P\sm R,\C)$ is injective.  
+
+ Now suppose we have $i\in P\sm R$.  If $i$ is maximal in $P$, we put 
+ \[ b_{ik} = \begin{cases}
+     0 & \text{ if } k < i \\
+     \prod_{j=i+1}^k \frac{f(j-1)}{g(j)} & \text{ if } k \geq i.
+    \end{cases}
+ \]
+ This gives an element $b_i\in K$, which lies in $K_0$ iff
+ $\max(Q)\geq i=\max(P)$.  We are using the standard convention that
+ the empty product is one, so $b_{ii}=1$, but $b_{ij}=0$ for all
+ $j\in P\sm\{i\}$.
+
+ Suppose instead that $i$ is not maximal in
+ $P$, and let $j$ be the smallest element in $P$ with $j>i$.  As
+ $i\not\in R$ the set $\{i,i+1,\dotsc,j-1\}\cap Q$ must be nonempty;
+ let $m$ be the smallest element.  Put 
+ \[ b_{ik} = \begin{cases}
+     0 & \text{ if } k < i \text{ or } k > m \\
+     \prod_{j=i+1}^k \frac{f(j-1)}{g(j)} & \text{ if } i\leq k\leq m.
+    \end{cases}
+ \]
+ Again we have $b_i\in K$ with $b_{ii}=1$ and $b_{ij}=0$ for
+ $j\in P\sm\{i\}$.
+
+ All claims are now clear except for the fact that
+ $|P\sm R|\leq |Q|+1$.  This holds because every element of $P\sm R$
+ is either maximal in $P$ or dominated by an element of $Q$.  
+\end{proof}
+
+\begin{remark}
+ Suppose that $L=z\,f(\Dl)-g(\Dl)$ and $L^*=z\,g(-\Dl)-f(-\Dl)$.  We
+ find that the map $(a_n)_{n\in\Z}\to (a_{-n})_{n\in\Z}$ gives an
+ isomorphism $\ann(L,S)\simeq\ann(L^*,S)$.  Using this we can
+ understand $\ann(L,S)$ in the case where $p>q$.  The case where $p=q$
+ will require a slightly different approach.
+\end{remark}
+
+\begin{definition}
+ Suppose that $L=z\,f(\Dl)-g(\Dl)$, where 
+ \begin{align*}
+  f(t) &= \al\prod_{j=1}^p(t-a_j) \\
+  g(t) &= \bt\prod_{j=1}^q(t-b_j).
+ \end{align*}
+ Suppose that $m\in\C$ is such that $\exp(m)=(-1)^p\al/\bt$.  We then
+ put 
+ \[ v(s) = v_{L,m}(s) =
+    e^{ms} \prod_{j=1}^p\Gm(a_i-s+1)^{-1} 
+           \prod_{j=1}^q\Gm(s+1-b_i)^{-1}.
+ \]
+ Recall that the Gamma function has poles but no zeros, so $v(s)$ is
+ holomorphic.  
+\end{definition}
+
+\begin{proposition}
+ The map $w(z)\mapsto w(e^{2\pi i s})v(s)$ gives an isomorphism from
+ the space of meromorphic functions on $\C^\tm$ to $\ann(L,F)$.
+\end{proposition}
+\begin{proof}
+ It is not hard to see that a nonzero meromorphic function $u\in F$
+ satisfies $Lu=0$ if and only if $u(s)/u(s-1)=f(s-1)/g(s)$.  Using the
+ functional equation $x\,\Gm(x)=\Gm(x+1)$ one can check that $v(s)$
+ has the above property, so $u\in\ann(L,F)$.  If $v$ is another
+ element of $\ann(L,F)$ then we have $(u/v)(s)=(u/v)(s-1)$, so
+ $(u/v)(s)=w(e^{2\pi is})$ for some holomorphic function on $\C^\tm$,
+ as claimed.
+\end{proof}
+
+To understand the nature of $v_{L,m}(s)$ and related functions, we
+need to know about the asymptotics of the Gamma function.  
+
+\begin{bibdiv}
+\begin{biblist}
+\bibselect{%
+../../BiBTeX/refs,%
+../../BiBTeX/myrefs%
+}
+\end{biblist}
+\end{bibdiv}
+
+\end{document}

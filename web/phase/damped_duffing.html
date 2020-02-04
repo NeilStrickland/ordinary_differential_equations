@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <meta charset="UTF-8">
+ <title>Damped Duffing oscillator</title>
+ <link rel="stylesheet" href="../css/MAS290.css">
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js"> 
+   MathJax.Hub.Config({
+     extensions: ["tex2jax.js"],
+     jax: ["input/TeX","output/HTML-CSS"],
+     tex2jax: {inlineMath: [["$","$"]]}
+   });
+ </script> 
+ <script type="text/javascript" src="../js/paperjs/paper.js"></script>
+ <script type="text/javascript" src="../js/ode.js"></script>
+ <script type="text/paperscript" canvas="canvas">
+
+var damped_duffing = ode.create();
+
+damped_duffing.x_min = -3;
+damped_duffing.x_max =  3;
+damped_duffing.y_min = -3;
+damped_duffing.y_max =  3;
+damped_duffing.x_scale = 80;
+damped_duffing.y_scale = 80;
+damped_duffing.t_scale = 0.4;
+damped_duffing.display_digits = 4;
+
+damped_duffing.update_walker = function(w,dt) {
+ var x0 = w.x;
+ var y0 = w.y;
+
+ var dx = y0*dt+(-0.5*x0*x0*x0+x0-0.05*y0)*dt*dt;
+ var dy = (-x0*x0*x0+2*x0-0.1*y0)*dt+(-1.5*x0*x0*y0+1.005*y0-0.1*x0+0.05*x0*x0*x0)*dt*dt;
+
+ this.translate_walker(w,dx,dy,dt);
+};
+
+//////////////////////////////////////////////////////////////////////
+
+var L = Object.create(damped_duffing);
+L.create_group();
+L.create_walker();
+L.fetch_lines('damped_duffing_lines.json');
+L.set_display();
+
+function onFrame(event) { L.on_frame(event); }
+function onMouseDown(event) { L.on_mouse_down(event); }
+
+ </script>
+</head>
+<body>
+<table>
+ <tr>
+  <td class="command" width="100" onclick="location='../index.html'">Home</td>
+  <td class="command" width="200" onclick="location='index.html'">List of phase portraits</td>
+  <td class="command" width="100" onclick="location='damped_duffing_trace.html'">Graph against <em>t</em></td>
+ </tr>
+</table>
+ <h1>The damped Duffing oscillator</h1>
+<table>
+ <tr>
+  <td>
+   <canvas id="canvas" width="450" height="420"></canvas>
+  </td>
+  <td valign="top">
+   \begin{align*}
+    \dot{x} &= y \\
+    \dot{y} &= 2x-x^3-0.1y.
+   \end{align*}
+   <br/><br/><br/><br/>
+   <table>
+    <tr>
+     <td>$x=$</td>
+     <td align="right"><span id="display_x"></span></td>
+    </tr>
+    <tr>
+     <td>$y=$</td>
+     <td align="right"><span id="display_y"></span></td>
+    </tr>
+    <tr>
+     <td>$\dot{x}=$</td>
+     <td align="right"><span id="display_x_dot"></span></td>
+    </tr>
+    <tr>
+     <td>$\dot{y}=$</td>
+     <td align="right"><span id="display_y_dot"></span></td>
+    </tr>
+   </table>
+  </td>
+ </tr>
+</table>
+ <div style="width:800px">
+ The <em>damped Duffing oscillator</em> is given by $\dot{x}=y$ and
+ $\dot{y}=2x-x^3-0.1y$.   The $x$-nullcline is the line $y=0$.  The
+ $y$-nullcline is given by $2x-x^3=0.1y$.  When $x$ is small we can
+ neglect the term $x^3$ so the $y$-nullcline equation becomes
+ $y=2x/0.1=20x$, which describes a steep line through the origin.
+ This should be compared with the vertical line $x=0$ which is part of
+ the $y$-nullcline for the undamped Duffing oscillator.  The
+ $y$-nullcline for the damped oscillator also includes curves through
+ $(\pm\sqrt{2},0)$ that can again be described approximately as
+ steeply sloping straight lines.  The equilibrium points are again 
+ \[ u_1 = (0,0) \qquad u_2 = (\sqrt{2},0) \qquad u_3 = (-\sqrt{2},0), 
+ \]
+ exactly the same as in the undamped case.  The Jacobian is 
+ \[ J = \left[\begin{array}{cc} \partial f/\partial x & \partial f/\partial y \\
+             \partial g/\partial x & \partial g/\partial y \end{array}\right]
+      = \left[\begin{array}{cc} 0 & 1 \\
+             2-3x^2 & -0.1 \end{array}\right],
+ \]
+ so $\tau=-0.1$ and $\delta=3x^2-2$.  At $u_1$ this becomes
+ $(\tau,\delta)=(-0.1,-2)$, so in particular $\delta<0$, so we have a
+ saddle.  At $u_2$ we have $(\tau,\delta)=(-0.1,4)$, so $\tau^2-4\delta<0$;
+ we therefore have a stable focus.  There is also a stable focus at
+ $u_3$, for the same reason.
+
+ We can again consider the function 
+ \[ V = 2y^2+x^4-4x^2+4, \]
+ but it is no longer conserved.  Instead we have 
+ \[ \dot{V} = 4y\dot{y} - 4x^3\dot{x}-8x\dot{x} 
+            = 4y(2x-x^3-0.1y)-4x^3y-8xy = -0.4y^2. 
+ \]
+ This shows that $\dot{V}\leq 0$, and that $\dot{V}$ can only be equal
+ to $0$ if $y=0$.  Using the description $V=2y^2+(x^2-2)^2$ we also
+ see that $V$ can only be zero at $u_2$ and $u_3$.  This means that
+ $V$ almost satisfies the conditions for a Lyapunov function, but not
+ quite.  
+
+ </div>
+</body>
+</html>

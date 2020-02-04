@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <meta charset="UTF-8">
+ <title>Damped Duffing oscillator</title>
+ <link rel="stylesheet" href="../css/MAS290.css">
+ <script src="/MathJax/MathJax.js"> 
+   MathJax.Hub.Config({
+     extensions: ["tex2jax.js"],
+     jax: ["input/TeX","output/HTML-CSS"],
+     tex2jax: {inlineMath: [["$","$"]]}
+   });
+ </script> 
+ <script type="text/javascript" src="/js/paperjs/dist/paper.js"></script>
+ <script type="text/javascript" src="../js/ode.js"></script>
+ <script type="text/paperscript" canvas="canvas">
+
+var damped_duffing = ode.create();
+
+damped_duffing.x_min = -3;
+damped_duffing.x_max =  3;
+damped_duffing.y_min = -2.5;
+damped_duffing.y_max =  2.5;
+damped_duffing.x_scale = 80;
+damped_duffing.y_scale = 80;
+damped_duffing.t_scale = 0.4;
+damped_duffing.display_digits = 4;
+
+damped_duffing.update_walker = function(w,dt) {
+ var x0 = w.x;
+ var y0 = w.y;
+
+ var dx = y0*dt+(-0.5*x0*x0*x0+x0-0.05*y0)*dt*dt;
+ var dy = (-x0*x0*x0+2*x0-0.1*y0)*dt+(-1.5*x0*x0*y0+1.005*y0-0.1*x0+0.05*x0*x0*x0)*dt*dt;
+
+ w.V = 2*y0*y0 + (x0*x0 - 2)*(x0*x0 - 2);
+ w.Vx = 4*(x0*x0 - 2)*x0;
+ w.Vy = 4*y0;
+ w.dV = w.Vx * dx + w.Vy * dy;
+
+ this.translate_walker(w,dx,dy,dt);
+};
+
+//////////////////////////////////////////////////////////////////////
+
+var L = Object.create(damped_duffing);
+L.create_group();
+L.lyapunov_region = new paper.Path(
+ [0,L.y_min+0.1],[0,L.y_max-0.1],[L.x_max-0.1,L.y_max-0.1],[L.x_max-0.1,L.y_min+0.1]
+);
+L.lyapunov_region.closed = true;
+L.lyapunov_region.strokeWidth = 4/L.x_scale;
+L.lyapunov_region.strokeColor = 'magenta';
+L.group.addChild(L.lyapunov_region);
+
+L.create_walker();
+L.fetch_lines('damped_duffing_lines.json');
+L.set_display();
+L.set_lyapunov_display();
+
+function onFrame(event) { L.on_frame(event); }
+function onMouseDown(event) { L.on_mouse_down(event); }
+
+ </script>
+</head>
+<body>
+ <table>
+ <tr>
+  <td class="command" width="100" onclick="location='../index.html'">Home</td>
+  <td class="command" width="200" onclick="location='index.html'">List of Lyapunov examples</td>
+ </tr>
+ </table>
+ <h1>The damped Duffing oscillator</h1>
+<table>
+ <tr>
+  <td>
+   <canvas id="canvas" width="480" height="420"></canvas>
+  </td>
+  <td valign="top">
+   \begin{align*}
+    \dot{x} &= y \\
+    \dot{y} &= 2x-x^3-0.1y \\
+    V &= 2y^2 + (x^2-1)^2
+   \end{align*}
+   <br/><br/><br/><br/>
+   <table>
+    <tr>
+     <td>$x=$</td>
+     <td align="right"><span id="display_x"></span></td>
+    </tr>
+    <tr>
+     <td>$y=$</td>
+     <td align="right"><span id="display_y"></span></td>
+    </tr>
+    <tr>
+     <td>$\dot{x}=$</td>
+     <td align="right"><span id="display_x_dot"></span></td>
+    </tr>
+    <tr>
+     <td>$\dot{y}=$</td>
+     <td align="right"><span id="display_y_dot"></span></td>
+    </tr>
+    <tr><td>&nbsp;</td></tr>
+    <tr>
+     <td>$V=$</td>
+     <td align="right"><span id="display_V"></span></td>
+    </tr>
+    <tr>
+     <td>$\dot{V}=$</td>
+     <td align="right"><span id="display_V_dot"></span></td>
+    </tr>
+   </table>
+  </td>
+ </tr>
+</table>
+ <div style="width:800px">
+ </div>
+</body>
+</html>
