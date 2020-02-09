@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <meta charset="UTF-8">
+ <title>Periodic shear</title>
+ <link rel="stylesheet" href="../css/MAS290.css">
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js"> 
+   MathJax.Hub.Config({
+     extensions: ["tex2jax.js"],
+     jax: ["input/TeX","output/HTML-CSS"],
+     tex2jax: {inlineMath: [["$","$"]]}
+   });
+ </script> 
+ <script type="text/javascript" src="../js/paperjs/paper.js"></script>
+ <script type="text/javascript" src="../js/ode.js"></script>
+ <script type="text/paperscript" canvas="canvas">
+
+var ODE = ode.create();
+
+ODE.x_min   = -2;
+ODE.x_max   = 2;
+ODE.y_min   = -2;
+ODE.y_max   = 2;
+ODE.x_scale = 100;
+ODE.y_scale = 100;
+ODE.t_scale = 1;
+
+
+
+ODE.update_walker = function(w,dt) {
+ var x0 = w.x;
+var y0 = w.y;
+var dx = Math.sin(Math.PI * y0) * dt;
+var dy = 0;
+this.translate_walker(w,dx,dy,dt);
+};
+
+var L = Object.create(ODE);
+
+L.create_group();
+L.create_walker();
+L.fetch_lines('periodic_shear_lines.json');
+L.set_display();
+
+function onFrame(event)     { L.on_frame(event);      }
+function onMouseDown(event) { L.on_mouse_down(event); }
+
+ </script>
+</head>
+<body>
+<table>
+ <tr>
+  <td class="command" width="100" onclick="location='../index.html'">Home</td>
+  <td class="command" width="200" onclick="location='index.html'">List of phase portraits</td>
+  
+ </tr>
+</table>
+<br/>
+<h1>Periodic shear</h1>
+<table>
+ <tr>
+  <td>
+   <canvas id="canvas" width="500" height="500"></canvas>
+  </td>
+  <td valign="top">
+  \begin{align*}
+ \dot{x} &= \sin \left( \pi \,y \right)  \\
+ \dot{y} &= 0 
+\end{align*}
+
+   <br/><br/><br/><br/>
+      <table>
+    <tr>
+     <td>$x=$</td>
+     <td align="right"><span id="display_x"></span></td>
+    </tr>
+    <tr>
+     <td>$y=$</td>
+     <td align="right"><span id="display_y"></span></td>
+    </tr>
+    <tr>
+     <td>$\dot{x}=$</td>
+     <td align="right"><span id="display_x_dot"></span></td>
+    </tr>
+    <tr>
+     <td>$\dot{y}=$</td>
+     <td align="right"><span id="display_y_dot"></span></td>
+    </tr>
+   </table>
+
+  </td>
+ </tr>
+</table>
+
+<div style="width:800px">
+
+</div>
+</body>
+</html>

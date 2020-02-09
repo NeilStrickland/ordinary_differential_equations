@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <meta charset="UTF-8">
+ <title>van der Pol oscillator</title>
+ <link rel="stylesheet" href="../css/MAS290.css">
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js"> 
+   MathJax.Hub.Config({
+     extensions: ["tex2jax.js"],
+     jax: ["input/TeX","output/HTML-CSS"],
+     tex2jax: {inlineMath: [["$","$"]]}
+   });
+ </script> 
+ <script type="text/javascript" src="../js/paperjs/paper.js"></script>
+ <script type="text/javascript" src="../js/ode.js"></script>
+ <script type="text/paperscript" canvas="canvas">
+
+var van_der_pol = ode.create();
+
+van_der_pol.x_min = -6;
+van_der_pol.x_max =  6;
+van_der_pol.y_min = -6;
+van_der_pol.y_max =  6;
+van_der_pol.x_padding = 0.5;
+van_der_pol.y_padding = 0.5;
+
+van_der_pol.x_scale = 40;
+van_der_pol.y_scale = 40;
+van_der_pol.t_scale = 0.4;
+van_der_pol.display_digits = 4;
+
+van_der_pol.update_walker = function(w,dt) {
+ var x0 = w.x;
+ var y0 = w.y;
+
+ var dx = y0*dt+(-x0*x0*y0+y0-(1/2)*x0)*dt*dt;
+ var dy = ((2*(-x0*x0+1))*y0-x0)*dt+(-2*x0*y0*y0+(3/2)*y0+2*x0*x0*x0*x0*y0+x0*x0*x0-4*x0*x0*y0-x0)*dt*dt;
+ this.translate_walker(w,dx,dy,dt);
+};
+
+//////////////////////////////////////////////////////////////////////
+
+var L = Object.create(van_der_pol);
+L.create_group();
+L.create_walker();
+L.fetch_lines('van_der_pol_lines.json');
+L.set_display();
+
+L.display_y_dot_a = document.getElementById('display_y_dot_a');
+L.display_y_dot_b = document.getElementById('display_y_dot_b');
+L.display_y_dot_c = document.getElementById('display_y_dot_c');
+
+L.display_numbers = function(x,y,dx,dy,dt) {
+ ode.display_numbers.call(this,x,y,dx,dy,dt);
+ this.display_y_dot_a.innerHTML =
+  (2*y).toFixed(2);
+ this.display_y_dot_b.innerHTML =
+  (-2*x*x*y).toFixed(2);
+ this.display_y_dot_c.innerHTML =
+  (-x).toFixed(2);
+};
+
+
+function onFrame(event) { L.on_frame(event); }
+function onMouseDown(event) { L.on_mouse_down(event); }
+
+ </script>
+</head>
+<body>
+<table>
+ <tr>
+  <td class="command" width="100" onclick="location='../index.html'">Home</td>
+  <td class="command" width="200" onclick="location='index.html'">List of phase portraits</td>
+  <td class="command" width="100" onclick="location='van_der_pol_trace.html'">Graph against <em>t</em></td>
+ </tr>
+</table>
+ <h1>van der Pol oscillator</h1>
+<table>
+ <tr>
+  <td>
+   <canvas id="canvas" width="450" height="420"></canvas>
+  </td>
+  <td valign="top">
+   \begin{align*}
+    \dot{x} &= y \\
+    \dot{y} &= 2(1-x^2)y - x \\
+            &= 2y - 2x^2y - x
+   \end{align*}
+   <br/><br/><br/><br/>
+   <table>
+    <tr>
+     <td>$x=$</td>
+     <td align="right"><span id="display_x"></span></td>
+    </tr>
+    <tr>
+     <td>$y=$</td>
+     <td align="right"><span id="display_y"></span></td>
+    </tr>
+    <tr>
+     <td>$\dot{x}=$</td>
+     <td align="right"><span id="display_x_dot"></span></td>
+    </tr>
+    <tr>
+     <td>$\dot{y}=$</td>
+     <td align="right"><span id="display_y_dot"></span></td>
+    </tr>
+    <tr><td>&nbsp;</td></tr>
+    <tr>
+     <td align="right">$2y=$</td>
+     <td align="right"><span id="display_y_dot_a"></span></td>
+    </tr>
+    <tr>
+     <td align="right">$-2x^2y=$</td>
+     <td align="right"><span id="display_y_dot_b"></span></td>
+    </tr>
+    <tr>
+     <td align="right">$-x=$</td>
+     <td align="right"><span id="display_y_dot_c"></span></td>
+    </tr>
+   </table>
+  </td>
+ </tr>
+</table>
+ <div style="width:800px">
+ The <em>van der Pol oscillator</em> has equations $\dot{x}=y$ and
+ $\dot{y}=2(1-x^2)y - x$.  The $x$-nullcline is the line $y=0$.  The
+ $y$-nullcline is given by $2(1-x^2)y - x=0$, or equivalently
+ $y=\frac{x}{2(1-x^2)}$.  (More precisely, the $y$-nullcline contains
+ the points $\left(x,\frac{x}{2(1-x^2)}\right)$ for all $x\neq\pm 1$,
+ but it does not contain any points $(x,y)$ with $x=\pm 1$.)  For an
+ equilibrium point we must have $y=0$ and also $2(1-x^2)y-x=0$ which
+ gives $x=0$.  Thus, the only equilibrium point is therefore at the
+ origin.  The Jacobian is 
+ \[ J = \left[\begin{array}{cc} 0 & 1 \\
+             -4xy-1 & 2-2x^2 \end{array}\right],
+ \]
+ which becomes $J=\left[\begin{array}{cc} 0&1\\-1&2\end{array}\right]$ at the origin.  This has
+ $\tau=2$ and $\delta=1$ and $\tau^2-4\delta=0$, so the eigenvalues are both
+ equal to one.  However, $J$ is not diagonalizable, so we have a
+ degenerate unstable node at the origin.  This means that solutions
+ starting near the origin will be quickly pushed away from the
+ origin.  However, it turns out that they do not escape to infinity.
+ Instead, the system has a new feature called a \emph{limit cycle}.
+ This is a strangely shaped closed curve of finite size that wraps
+ around the origin.  All solutions that start inside the limit cycle
+ spiral outwards to approach the curve asymptotically as
+ $t\to\infty$.  Solutions that start outside the limit cycle move very
+ quickly in a nearly vertical direction until they are close to the
+ $x$-axis, at which point they turn sharply sideways and move much
+ more slowly to approach the limit cycle and spiral in to it from the
+ outside. 
+
+ </div>
+</body>
+</html>

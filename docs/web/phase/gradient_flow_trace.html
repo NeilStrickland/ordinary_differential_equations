@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <meta charset="UTF-8">
+ <title>Gradient flow</title>
+ <link rel="stylesheet" href="../css/MAS290.css">
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js"> 
+   MathJax.Hub.Config({
+     extensions: ["tex2jax.js"],
+     jax: ["input/TeX","output/HTML-CSS"],
+     tex2jax: {inlineMath: [["$","$"]]}
+   });
+ </script> 
+ <script type="text/javascript" src="../js/paperjs/paper.js"></script>
+ <script type="text/javascript" src="../js/ode.js"></script>
+ <script type="text/paperscript" canvas="canvas">
+
+var gradient_flow = ode.create();
+
+gradient_flow.x_min = -3;
+gradient_flow.x_max =  3;
+gradient_flow.y_min = -3;
+gradient_flow.y_max =  3;
+gradient_flow.x_scale = 80;
+gradient_flow.y_scale = 80;
+gradient_flow.view_type = 'disc';
+gradient_flow.view_radius = 3;
+gradient_flow.display_digits = 4; 
+
+gradient_flow.trace_x_shift = 320;
+gradient_flow.trace_y_shift = 35;
+gradient_flow.trace_t_scale = 60;
+gradient_flow.trace_v_scale = 40;
+gradient_flow.trace_t_max = 6;
+gradient_flow.trace_t_tick_gap = 5;
+gradient_flow.trace_t_tick_size = 0.05;
+gradient_flow.trace_v_min = -5;
+gradient_flow.trace_v_max =  5;
+gradient_flow.trace_t_padding = 3;
+gradient_flow.trace_v_padding = 0.05;
+
+gradient_flow.update_walker = function(w,dt) {
+ var x0 = w.x;
+ var y0 = w.y;
+ var dx = (-Math.pow(x0,3)+x0)*dt+((3/2)*Math.pow(x0,5)-2*Math.pow(x0,3)+(1/2)*x0)*dt*dt;
+ var dy = (-Math.pow(y0,3)+y0)*dt+((3/2)*Math.pow(y0,5)-2*Math.pow(y0,3)+(1/2)*y0)*dt*dt;
+
+ this.translate_walker(w,dx,dy,dt);
+};
+
+//////////////////////////////////////////////////////////////////////
+
+var L = Object.create(gradient_flow);
+L.create_group();
+L.create_walker();
+L.draw_outline();
+L.fetch_lines('gradient_flow_lines.json');
+L.set_display();
+
+L.create_trace_group();
+
+function onFrame(event) { L.on_frame(event); }
+function onMouseDown(event) { L.on_mouse_down(event); }
+
+ </script>
+</head>
+<body>
+ <table>
+ <tr>
+  <td class="command" width="100" onclick="location='../index.html'">Home</td>
+  <td class="command" width="200" onclick="location='index.html'">List of phase portraits</td>
+  <td class="command" width="150" onclick="location='gradient_flow.html'">Phase portrait only</td>
+ </tr>
+ </table>
+ <h1>A gradient flow</h1>
+
+<table>
+ <tr>
+  <td>
+   <canvas id="canvas" width="900" height="520"></canvas>
+  </td>
+  <td valign="top">
+   \begin{align*}
+    \dot{x} &= x-x^3 = x(1-x)(1+x) \\
+    \dot{y} &= y-y^3 = y(1-y)(1+y).
+   \end{align*}
+   <br/><br/><br/><br/>
+   <table>
+    <tr>
+     <td>$x=$</td>
+     <td align="right"><span id="display_x" style="color:red"></span></td>
+    </tr>
+    <tr>
+     <td>$y=$</td>
+     <td align="right"><span id="display_y" style="color:blue"></span></td>
+    </tr>
+    <tr>
+     <td>$\dot{x}=$</td>
+     <td align="right"><span id="display_x_dot"></span></td>
+    </tr>
+    <tr>
+     <td>$\dot{y}=$</td>
+     <td align="right"><span id="display_y_dot"></span></td>
+    </tr>
+   </table>
+  </td>
+ </tr>
+</table>
+
+ <div style="width:800px">
+ Here $x$ and $y$ change according to the equations
+ \begin{align*}
+  \dot{x} &= x-x^3 \\
+  \dot{y} &= y-y^3.
+ \end{align*}
+ The $x$-nullcline is given by $x-x^3=0$, which factors as
+ $x(1+x)(1-x)=0$, so $x=0$ or $x=\pm 1$.  Similarly, the $y$-nullcline
+ is given by $y-y^3=0$, so $y=0$ or $y=\pm 1$.  This means that there
+ are nine equilibrium points $(n,m)$ with $n,m\in\{-1,0,1\}$.  The
+ Jacobian is 
+ \[ J = \left[\begin{array}{cc} \partial f/\partial x & \partial f/\partial y \\
+             \partial g/\partial x & \partial g/\partial y \end{array}\right]
+      = \left[\begin{array}{cc} 1-3x^2 & 0 \\
+             0 & 1-3y^2 \end{array}\right].
+ \]
+ If $x$ and $y$ are both zero then $J$ is the identity matrix,
+ corresponding to an improper unstable node.  If $x=0$ and $y=\pm 1$
+ (or <em>vice versa</em>) then the eigenvalues are $1$ and $-2$, one
+ positive and one negative, so we have a saddle.  If both $x$ and $y$
+ are $\pm 1$ then $J=-2I$, corresponding to an improper stable node.
+
+ The above is enough for a reasonably good sketch of the phase
+ diagram.  However, in this case it is possible to just give a formula
+ for the solution:
+ \begin{align*}
+  x &= (1+(x_0^{-2}-1)e^{-2t})^{-1/2} \\
+  y &= (1+(y_0^{-2}-1)e^{-2t})^{-1/2}.  
+ \end{align*}
+
+ To check that this works, it will be convenient to put
+ $C=x_0^{-2}-1$, so $x=(1+Ce^{-2t})^{-1/2}$.  This gives
+ \begin{align*}
+  \dot{x} &= -\tfrac{1}{2}(1+Ce^{-2t})^{-3/2}\times(-2)\times
+              Ce^{-2t} 
+           = (1+Ce^{-2t})^{-3/2}C e^{-2t} \\
+  x-x^3 &= x^3(x^{-2}-1)
+         = (1+Ce^{-2t})^{-3/2}(1+Ce^{-2t}-1) 
+         = (1+Ce^{-2t})^{-3/2}C e^{-2t} = \dot{x},
+ \end{align*}
+ as required.  Essentially the same argument gives $\dot{y}=y-y^3$.
+
+ </div>
+</body>
+</html>

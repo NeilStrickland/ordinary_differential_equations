@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <meta charset="UTF-8">
+ <title>Lyapunov example</title>
+ <link rel="stylesheet" href="../css/MAS290.css">
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js"> 
+   MathJax.Hub.Config({
+     extensions: ["tex2jax.js"],
+     jax: ["input/TeX","output/HTML-CSS"],
+     tex2jax: {inlineMath: [["$","$"]]}
+   });
+ </script> 
+ <script type="text/javascript" src="../js/paperjs/paper.js"></script>
+ <script type="text/javascript" src="../js/ode.js"></script>
+ <script type="text/paperscript" canvas="canvas">
+
+var complex_square_offset = ode.create();
+
+complex_square_offset.x_min = -2;
+complex_square_offset.x_max =  2;
+complex_square_offset.y_min = -2;
+complex_square_offset.y_max =  2;
+complex_square_offset.x_scale = 120;
+complex_square_offset.y_scale = 120;
+complex_square_offset.t_scale = 0.4;
+complex_square_offset.display_digits = 4;
+
+complex_square_offset.update_walker = function(w,dt) {
+ var x0 = w.x;
+ var y0 = w.y;
+
+ var dx = (x0*x0 - y0*y0 - 0.25)*dt +
+           (x0*x0*x0 - 3*x0*y0*y0 - 0.25*x0) * dt * dt;
+ var dy = 2*x0*y0*dt + (3*x0*x0*y0 - y0*y0*y0 - 0.25*y0) * dt * dt;
+
+ w.V = (x0+0.5)*(x0+0.5) + y0*y0;
+ w.Vx = 2*x0+1;
+ w.Vy = 2*y0;
+ w.dV = w.Vx * dx + w.Vy * dy;
+
+ this.translate_walker(w,dx,dy,dt);
+};
+
+//////////////////////////////////////////////////////////////////////
+
+var L = Object.create(complex_square_offset);
+L.create_group();
+L.lyapunov_region = new paper.Path(
+ [0.5,L.y_min+0.02],
+ [0.5,L.y_max-0.02],
+ [-L.x_max+0.02,L.y_max-0.02],
+ [-L.x_max+0.02,L.y_min+0.02]
+);
+L.lyapunov_region.closed = true;
+L.lyapunov_region.strokeWidth = 4/L.x_scale;
+L.lyapunov_region.strokeColor = 'magenta';
+L.group.addChild(L.lyapunov_region);
+
+L.create_walker();
+L.fetch_lines('complex_square_offset_lines.json');
+L.set_display();
+L.set_lyapunov_display();
+
+function onFrame(event) { L.on_frame(event); }
+function onMouseDown(event) { L.on_mouse_down(event); }
+
+ </script>
+</head>
+<body>
+ <table>
+ <tr>
+  <td class="command" width="100" onclick="location='../index.html'">Home</td>
+  <td class="command" width="200" onclick="location='index.html'">List of Lyapunov examples</td>
+ </tr>
+ </table>
+ <h1>Lyapunov example</h1>
+<table>
+ <tr>
+  <td>
+   <canvas id="canvas" width="490" height="480"></canvas>
+  </td>
+  <td valign="top">
+   \begin{align*}
+    \dot{x} &= x^2-y^2-1/4 \\
+    \dot{y} &= 2xy \\
+    V &= (x+1/2)^2 + y^2
+   \end{align*}
+   <br/><br/><br/><br/>
+   <table>
+    <tr>
+     <td>$x=$</td>
+     <td align="right"><span id="display_x"></span></td>
+    </tr>
+    <tr>
+     <td>$y=$</td>
+     <td align="right"><span id="display_y"></span></td>
+    </tr>
+    <tr>
+     <td>$\dot{x}=$</td>
+     <td align="right"><span id="display_x_dot"></span></td>
+    </tr>
+    <tr>
+     <td>$\dot{y}=$</td>
+     <td align="right"><span id="display_y_dot"></span></td>
+    </tr>
+    <tr><td>&nbsp;</td></tr>
+    <tr>
+     <td>$V=$</td>
+     <td align="right"><span id="display_V"></span></td>
+    </tr>
+    <tr>
+     <td>$\dot{V}=$</td>
+     <td align="right"><span id="display_V_dot"></span></td>
+    </tr>
+   </table>
+  </td>
+ </tr>
+</table>
+ <div style="width:800px">
+ </div>
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <meta charset="UTF-8">
+ <title>Pendulum</title>
+ <link rel="stylesheet" href="../css/MAS290.css">
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js"> 
+   MathJax.Hub.Config({
+     extensions: ["tex2jax.js"],
+     jax: ["input/TeX","output/HTML-CSS"],
+     tex2jax: {inlineMath: [["$","$"]]}
+   });
+ </script> 
+ <script type="text/javascript" src="../js/paperjs/paper.js"></script>
+ <script type="text/javascript" src="../js/ode.js"></script>
+ <script type="text/paperscript" canvas="canvas">
+
+var pendulum = ode.create();
+
+pendulum.x_min = -942;
+pendulum.x_max =  942;
+pendulum.y_min = -400;
+pendulum.y_max =  400;
+pendulum.x_scale = 0.4;
+pendulum.y_scale = 0.4;
+
+pendulum.create_group = function() {
+ ode.create_group.call(this);
+
+ this.pic = new paper.Raster("pendulum");
+ this.pic.scale(0.25);
+ this.pic.position = new paper.Point(960,250);
+ this.pic_centre = new paper.Point(957,195);
+};
+
+pendulum.update_walker = function(w,dt) {
+ var dx = dt * w.y - dt * dt * 50 * Math.sin(w.x * 0.01);
+ var dy = - 100 * Math.sin(w.x * 0.01) * dt
+              - 0.5 * dt * dt * w.y * Math.cos(w.x * 0.01);
+
+ this.translate_walker(w,dx,dy,dt);
+ if (w.x > 942) {
+  this.translate_walker(w,-1884,0,0);
+ } else if (w.x < - 942) {
+  this.translate_walker(w, 1884,0,0);
+ }
+
+ this.display_numbers(w.x/314.,w.y/314.,dx/314.,dy/314.,dt);
+};
+
+pendulum.translate_walker = function(w,dx,dy) {
+ w.x += dx;
+ w.y += dy;
+ w.marker.translate(new paper.Point(dx,dy));
+ this.pic.rotate(- dx * 1.8/Math.PI,this.pic_centre);
+};
+
+//////////////////////////////////////////////////////////////////////
+
+var L = Object.create(pendulum);
+L.create_group();
+L.create_walker();
+L.fetch_lines('pendulum_lines.json');
+
+L.display_x = document.getElementById('display_theta');
+L.display_y = document.getElementById('display_omega');
+L.display_x_dot = document.getElementById('display_theta_dot');
+L.display_y_dot = document.getElementById('display_omega_dot');
+
+function onFrame(event) { L.on_frame(event); }
+function onMouseDown(event) { L.on_mouse_down(event); }
+
+ </script>
+</head>
+<body>
+<table>
+ <tr>
+  <td class="command" width="100" onclick="location='../index.html'">Home</td>
+  <td class="command" width="200" onclick="location='index.html'">List of phase portraits</td>
+  <td class="command" width="100" onclick="location='pendulum_trace.html'">Graph against <em>t</em></td>
+ </tr>
+</table>
+ <h1>Pendulum</h1>
+ <canvas id="canvas" width="1100" height="400"></canvas>
+ <img id="pendulum" src="pendulum.png" style="display:none"/>
+ <br/>
+ <table>
+  <tr>
+   <td width="500">
+    The angle $\theta$ and angular velocity $\omega$ change according to the equations
+    \begin{align*}
+     \dot{\theta} &= \omega \\
+     \dot{\omega} &= -\sin(\theta).
+    \end{align*}
+   </td>
+   <td>
+    <table>
+     <tr>
+      <td>$\theta=$</td>
+      <td align="right"><span id="display_theta"></span>$\pi$</td>
+     </tr>
+     <tr>
+      <td>$\omega=$</td>
+      <td align="right"><span id="display_omega"></span>$\pi$</td>
+     </tr>
+     <tr>
+      <td>$\dot{\theta}=$</td>
+      <td align="right"><span id="display_theta_dot"></span>$\pi$</td>
+     </tr>
+     <tr>
+      <td>$\dot{\omega}=$</td>
+      <td align="right"><span id="display_omega_dot"></span>$\pi$</td>
+     </tr>
+    </table>
+   </td>
+  </tr>
+ </table>
+</body>
+</html>

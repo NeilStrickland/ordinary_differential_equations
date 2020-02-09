@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <meta charset="UTF-8">
+ <title>Contour flow</title>
+ <link rel="stylesheet" href="../css/MAS290.css">
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js"> 
+   MathJax.Hub.Config({
+     extensions: ["tex2jax.js"],
+     jax: ["input/TeX","output/HTML-CSS"],
+     tex2jax: {inlineMath: [["$","$"]]}
+   });
+ </script> 
+ <script type="text/javascript" src="../js/paperjs/paper.js"></script>
+ <script type="text/javascript" src="../js/ode.js"></script>
+ <script type="text/paperscript" canvas="canvas">
+
+var contour_flow = ode.create();
+
+contour_flow.x_min = -2.5;
+contour_flow.x_max =  2.5;
+contour_flow.y_min = -2.5;
+contour_flow.y_max =  2.5;
+contour_flow.x_scale = 80;
+contour_flow.y_scale = 80;
+contour_flow.t_scale = 0.4;
+contour_flow.display_digits = 4; 
+
+contour_flow.update_walker = function(w,dt) {
+ var x0 = w.x;
+ var y0 = w.y;
+
+ var dx = (y0*y0*y0-y0)*dt+(-(3/2)*x0*x0*x0*y0*y0+(1/2)*x0*x0*x0+(3/2)*x0*y0*y0-(1/2)*x0)*dt*dt;
+ var dy = (-x0*x0*x0+x0)*dt+(-(3/2)*x0*x0*y0*y0*y0+(3/2)*x0*x0*y0+(1/2)*y0*y0*y0-(1/2)*y0)*dt*dt;
+
+ this.translate_walker(w,dx,dy,dt);
+};
+
+//////////////////////////////////////////////////////////////////////
+
+var L = Object.create(contour_flow);
+L.create_group();
+L.create_walker();
+L.fetch_lines('contour_flow_lines.json');
+L.set_display();
+
+function onFrame(event) { L.on_frame(event); }
+function onMouseDown(event) { L.on_mouse_down(event); }
+
+ </script>
+</head>
+<body>
+<table>
+ <tr>
+  <td class="command" width="100" onclick="location='../index.html'">Home</td>
+  <td class="command" width="200" onclick="location='index.html'">List of phase portraits</td>
+  <td class="command" width="100" onclick="location='contour_flow_trace.html'">Graph against <em>t</em></td>
+ </tr>
+</table>
+ <h1>A contour flow</h1>
+
+<table>
+ <tr>
+  <td>
+   <canvas id="canvas" width="450" height="420"></canvas>
+  </td>
+  <td valign="top">
+   \begin{align*}
+    \dot{x} &= y^3-y = y(y+1)(y-1) \\
+    \dot{y} &= x-x^3 = x(1+x)(1-x).
+   \end{align*}
+   <br/><br/><br/><br/>
+   <table>
+    <tr>
+     <td>$x=$</td>
+     <td align="right"><span id="display_x"></span></td>
+    </tr>
+    <tr>
+     <td>$y=$</td>
+     <td align="right"><span id="display_y"></span></td>
+    </tr>
+    <tr>
+     <td>$\dot{x}=$</td>
+     <td align="right"><span id="display_x_dot"></span></td>
+    </tr>
+    <tr>
+     <td>$\dot{y}=$</td>
+     <td align="right"><span id="display_y_dot"></span></td>
+    </tr>
+   </table>
+  </td>
+ </tr>
+</table>
+
+ <div style="width:800px">
+ Here $x$ and $y$ change according to the equations
+ \begin{align*}
+  \dot{x} &= y^3-y = y(y+1)(y-1) \\
+  \dot{y} &= x-x^3 = x(1+x)(1-x).
+ \end{align*}
+ The $x$-nullcline consists of three horizontal lines, with equations
+ $y=0$, $y=1$ and $y=-1$.  Similarly, the $y$-nullcline consists of
+ three vertical lines, with equations $x=0$, $x=1$ and $x=-1$.  This
+ means that there are nine equilibrium points $(n,m)$ with
+ $n,m\in\{-1,0,1\}$.  The Jacobian is
+ \[ J = \left[\begin{array}{cc} \partial f/\partial x & \partial f/\partial y \\
+             \partial g/\partial x & \partial g/\partial y \end{array}\right]
+      = \left[\begin{array}{cc} 0 & 3y^2-1 \\
+             1-3x^2 & 0 \end{array}\right],
+ \]
+ so the trace is $\tau=0$ and the determinant is
+ $\delta=(1-3x^2)(1-3y^2)$.  As $\tau=0$ we see that the equilibrium
+ points are centres if $\delta > 0$, and saddles if $\delta < 0$.  If $x$ and
+ $y$ are both zero then $\delta=1$, corresponding to a cycle.  The bottom
+ left entry in $J$ is $1-3x^2=1>0$, so the rotation is anticlockwise.
+ If $x=0$ and $y=\pm 1$ then $\delta=-2 < 0$, corresponding to a saddle.
+ The same applies if $x=\pm 1$ and $y=0$.  Finally, if both $x$ and
+ $y$ are $\pm 1$ then $\delta > 0$, which means we have another cycle.  The
+ bottom left entry is $-2 < 0$, so the rotation is clockwise.
+
+ </div>
+</body>
+</html>
